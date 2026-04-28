@@ -1,37 +1,88 @@
-# Railway All-in-One: Reuse existing GHCR images
-# Extract content from existing images and merge into a single container
+# Railway All-in-One (source build)
+# Builds backend + frontend from CURRENT REPO COMMIT (no upstream prebuilt images)
 
-# Extract binary from backend image
-FROM ghcr.io/nofxaios/nofx/nofx-backend:latest AS backend
+ARG GO_VERSION=1.25-alpine
+ARG NODE_VERSION=20-alpine
+ARG ALPINE_VERSION=latest
+ARG TA_LIB_VERSION=0.4.0
 
-# Extract static files from frontend image
-FROM ghcr.io/nofxaios/nofx/nofx-frontend:latest AS frontend
+# ──────────────────────────────────────────────────────────────
+# TA-Lib build stage
+# ──────────────────────────────────────────────────────────────
+FROM alpine:${ALPINE_VERSION} AS ta-lib-builder
+ARG TA_LIB_VERSION
 
-# Final image
-FROM alpine:latest
+RUN apk update && apk add --no-cache \
+    wget tar make gcc g++ musl-dev autoconf automake
+
+RUN wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-${TA_LIB_VERSION}-src.tar.gz && \
+    tar -xzf ta-lib-${TA_LIB_VERSION}-src.tar.gz && \
+    cd ta-lib && \
+    if [ "$(uname -m)" = "aarch64" ]; then \
+      CONFIG_GUESS=$(find /usr/share -name config.guess | head -1) && \
+      CONFIG_SUB=$(find /usr/share -name config.sub | head -1) && \
+      cp "$CONFIG_GUESS" config.guess && \
+      cp "$CONFIG_SUB" config.sub && \
+      chmod +x config.guess config.sub; \
+    fi && \
+    ./configure --prefix=/usr/local && \
+    make && make install && \
+    cd .. && rm -rf ta-lib ta-lib-${TA_LIB_VERSION}-src.tar.gz
+
+# ──────────────────────────────────────────────────────────────
+# Backend build stage
+# ──────────────────────────────────────────────────────────────
+FROM golang:${GO_VERSION} AS backend-builder
+
+RUN apk update && apk add --no-cache git make gcc g++ musl-dev
+COPY --from=ta-lib-builder /usr/local /usr/local
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+RUN CGO_ENABLED=1 GOOS=linux \
+    CGO_CFLAGS="-D_LARGEFILE64_SOURCE" \
+    go build -trimpath -ldflags="-s -w" -o /app/nofx .
+
+# ──────────────────────────────────────────────────────────────
+# Frontend build stage
+# ──────────────────────────────────────────────────────────────
+FROM node:${NODE_VERSION} AS frontend-builder
+WORKDIR /build
+
+COPY web/package*.json ./
+RUN npm ci
+
+COPY web/ ./
+RUN npm run build
+
+# ──────────────────────────────────────────────────────────────
+# Final runtime stage
+# ──────────────────────────────────────────────────────────────
+FROM alpine:${ALPINE_VERSION}
 
 RUN apk add --no-cache ca-certificates tzdata sqlite nginx openssl gettext
 
-# Copy backend binary
-COPY --from=backend /app/nofx /app/nofx
-
-# Copy TA-Lib libraries
-COPY --from=backend /usr/local/lib/libta_lib* /usr/local/lib/
+# Backend binary + TA-Lib runtime
+COPY --from=backend-builder /app/nofx /app/nofx
+COPY --from=ta-lib-builder /usr/local/lib/libta_lib* /usr/local/lib/
 RUN ldconfig /usr/local/lib 2>/dev/null || true
 
-# Copy frontend static files
-COPY --from=frontend /usr/share/nginx/html /usr/share/nginx/html
+# Frontend static build
+COPY --from=frontend-builder /build/dist /usr/share/nginx/html
 
 WORKDIR /app
 RUN mkdir -p /app/data
 
-# Startup script (includes nginx config generation)
+# Startup script (generates nginx config and runs backend + nginx)
 COPY railway/start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
 ENV DB_PATH=/app/data/data.db
 
-# Railway automatically sets the PORT environment variable
+# Railway provides PORT env var
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
