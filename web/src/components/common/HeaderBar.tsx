@@ -90,10 +90,13 @@ export default function HeaderBar({
           onClick={() => {
             navigateInApp(ROUTES.home)
           }}
-          className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
+          className="flex items-center hover:opacity-80 transition-opacity cursor-pointer"
         >
-          <img src="/icons/nofx.png" alt="NOFX Logo" className="w-7 h-7" />
-          <span className="text-lg font-bold text-nofx-gold">NOFX</span>
+          <img
+            src="/icons/nofx.png"
+            alt="NexTech Logo"
+            className="h-10 w-[180px] object-contain object-left"
+          />
         </div>
 
         {/* Desktop Menu */}
