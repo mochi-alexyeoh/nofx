@@ -159,18 +159,6 @@ export default function TerminalHero() {
                 {/* CENTER COLUMN: MAIN ACTION */}
                 <div className="col-span-1 lg:col-span-6 flex flex-col items-center justify-center text-center relative z-20 pointer-events-auto">
 
-                    {/* Project Identity Chip */}
-                    <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mb-8 inline-flex items-center gap-3 px-4 py-2 rounded-full border border-nofx-gold/20 bg-nofx-gold/5 backdrop-blur-md"
-                    >
-                        <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-nofx-gold opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-nofx-gold"></span>
-                        </span>
-                        <span className="text-xs font-mono text-nofx-gold tracking-widest">NOFX OPEN-SOURCE AGENTIC OS</span>
-                    </motion.div>
 
                     {/* Main Title - Massive & Impactful */}
                     {/* Main Title - Massive & Impactful */}
