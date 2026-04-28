@@ -129,6 +129,7 @@ export default function HeaderBar({
                         ? 'Data'
                         : 'Data',
                   requiresAuth: false,
+                  hidden: true,
                 },
                 {
                   page: 'strategy-market',
@@ -466,6 +467,7 @@ export default function HeaderBar({
                             ? 'Data'
                             : 'Data',
                       requiresAuth: false,
+                      hidden: true,
                     },
                     {
                       page: 'strategy-market',
