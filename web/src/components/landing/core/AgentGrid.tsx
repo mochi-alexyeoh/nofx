@@ -5,11 +5,9 @@ import { useAuth } from '../../../contexts/AuthContext'
 
 const agents = [
   {
-    name: 'ALPHA-1',
-    // ... (rest of agents array remains, but I can't skip lines in replacement content easily without context. Wait, let's just replace the top section)
-    // Actually, I'll use multi_replace for targeted cleanup.
+    name: 'Aggressive',
     class: 'SCALPER',
-    desc: 'High-frequency microstructure exploitation.',
+    desc: 'High-leverage active trading',
     apy: '142%',
     winRate: '68%',
     risk: 'HIGH',
@@ -19,9 +17,9 @@ const agents = [
     icon: Zap,
   },
   {
-    name: 'BETA-X',
+    name: 'Balanced',
     class: 'SWING_OPS',
-    desc: 'Multi-day trend extraction engine.',
+    desc: 'Optimized risk-reward trading',
     apy: '89%',
     winRate: '55%',
     risk: 'MED',
@@ -31,9 +29,9 @@ const agents = [
     icon: TrendingUp,
   },
   {
-    name: 'GAMMA-RAY',
+    name: 'Conservative',
     class: 'ARBITRAGE',
-    desc: 'Low-risk spatial price equalization.',
+    desc: 'Low-leverage play-it-safe trading',
     apy: '24%',
     winRate: '99%',
     risk: 'LOW',
