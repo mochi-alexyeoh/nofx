@@ -23,7 +23,7 @@ export default function DeploymentHub() {
                     {/* Left Column: Context */}
                     <div className="space-y-8">
                         <div className="flex items-center gap-2 text-nofx-gold font-mono text-xs tracking-[0.2em] uppercase">
-                            <Server className="w-4 h-4" /> System Deployment
+                            <Server className="w-4 h-4" /> AI Trader Deployment
                         </div>
 
                         <h2 className="text-4xl md:text-6xl font-black text-white leading-tight">
@@ -31,14 +31,13 @@ export default function DeploymentHub() {
                         </h2>
 
                         <p className="text-zinc-400 text-lg leading-relaxed font-light">
-                            Initialize your own high-frequency trading node in seconds.
-                            Our optimized installer handles all dependencies, bringing your autonomous agent online with a single command.
+                            Initialize your own AI Trader in seconds. Sign Up, connect with your preferred Exchange, and bring your autonomous AI agent online to trade intelligently.
                         </p>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
                             {[
-                                { icon: Command, label: "One-Line Install", desc: "No configuration needed" },
-                                { icon: Shield, label: "Secure Core", desc: "Sandboxed execution env" }
+                                { icon: Command, label: "One-Click Start", desc: "No complicated setups" },
+                                { icon: Shield, label: "Secure Core", desc: "Your funds are safe in your exchange." }
                             ].map((item, i) => (
                                 <div key={i} className="flex gap-4 items-start p-4 rounded bg-zinc-900/50 border border-zinc-800 hover:border-nofx-gold/30 transition-colors group">
                                     <div className="p-2 rounded bg-black border border-zinc-800 text-nofx-gold group-hover:bg-nofx-gold/10 transition-colors">
