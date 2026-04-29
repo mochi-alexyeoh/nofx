@@ -1,13 +1,10 @@
 import {
   BookOpen,
-  Settings,
   TrendingUp,
-  Wrench,
   Bot,
   Shield,
   Monitor,
   Zap,
-  GitBranch,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -74,45 +71,6 @@ export const faqCategories: FAQCategory[] = [
         id: 'system-requirements',
         questionKey: 'faqSystemRequirements',
         answerKey: 'faqSystemRequirementsAnswer',
-      },
-    ],
-  },
-
-  // ===== 2. INSTALLATION =====
-  {
-    id: 'installation',
-    titleKey: 'faqCategoryInstallation',
-    icon: Settings,
-    items: [
-      {
-        id: 'how-to-install',
-        questionKey: 'faqHowToInstall',
-        answerKey: 'faqHowToInstallAnswer',
-      },
-      {
-        id: 'windows-installation',
-        questionKey: 'faqWindowsInstallation',
-        answerKey: 'faqWindowsInstallationAnswer',
-      },
-      {
-        id: 'docker-deployment',
-        questionKey: 'faqDockerDeployment',
-        answerKey: 'faqDockerDeploymentAnswer',
-      },
-      {
-        id: 'manual-installation',
-        questionKey: 'faqManualInstallation',
-        answerKey: 'faqManualInstallationAnswer',
-      },
-      {
-        id: 'server-deployment',
-        questionKey: 'faqServerDeployment',
-        answerKey: 'faqServerDeploymentAnswer',
-      },
-      {
-        id: 'update-nofx',
-        questionKey: 'faqUpdateNOFX',
-        answerKey: 'faqUpdateNOFXAnswer',
       },
     ],
   },
@@ -205,55 +163,6 @@ export const faqCategories: FAQCategory[] = [
     ],
   },
 
-  // ===== 5. TECHNICAL ISSUES =====
-  {
-    id: 'technical-issues',
-    titleKey: 'faqCategoryTechnicalIssues',
-    icon: Wrench,
-    items: [
-      {
-        id: 'port-in-use',
-        questionKey: 'faqPortInUse',
-        answerKey: 'faqPortInUseAnswer',
-      },
-      {
-        id: 'frontend-not-loading',
-        questionKey: 'faqFrontendNotLoading',
-        answerKey: 'faqFrontendNotLoadingAnswer',
-      },
-      {
-        id: 'database-locked',
-        questionKey: 'faqDatabaseLocked',
-        answerKey: 'faqDatabaseLockedAnswer',
-      },
-      {
-        id: 'talib-not-found',
-        questionKey: 'faqTALibNotFound',
-        answerKey: 'faqTALibNotFoundAnswer',
-      },
-      {
-        id: 'ai-api-timeout',
-        questionKey: 'faqAIAPITimeout',
-        answerKey: 'faqAIAPITimeoutAnswer',
-      },
-      {
-        id: 'binance-position-mode',
-        questionKey: 'faqBinancePositionMode',
-        answerKey: 'faqBinancePositionModeAnswer',
-      },
-      {
-        id: 'balance-shows-zero',
-        questionKey: 'faqBalanceShowsZero',
-        answerKey: 'faqBalanceShowsZeroAnswer',
-      },
-      {
-        id: 'docker-pull-failed',
-        questionKey: 'faqDockerPullFailed',
-        answerKey: 'faqDockerPullFailedAnswer',
-      },
-    ],
-  },
-
   // ===== 6. SECURITY =====
   {
     id: 'security',
@@ -341,32 +250,4 @@ export const faqCategories: FAQCategory[] = [
     ],
   },
 
-  // ===== 9. CONTRIBUTING =====
-  {
-    id: 'contributing',
-    titleKey: 'faqCategoryContributing',
-    icon: GitBranch,
-    items: [
-      {
-        id: 'how-to-contribute',
-        questionKey: 'faqHowToContribute',
-        answerKey: 'faqHowToContributeAnswer',
-      },
-      {
-        id: 'pr-guidelines',
-        questionKey: 'faqPRGuidelines',
-        answerKey: 'faqPRGuidelinesAnswer',
-      },
-      {
-        id: 'bounty-program',
-        questionKey: 'faqBountyProgram',
-        answerKey: 'faqBountyProgramAnswer',
-      },
-      {
-        id: 'report-bugs',
-        questionKey: 'faqReportBugs',
-        answerKey: 'faqReportBugsAnswer',
-      },
-    ],
-  },
 ]
