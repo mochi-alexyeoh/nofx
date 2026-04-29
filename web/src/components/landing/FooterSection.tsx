@@ -1,4 +1,4 @@
-import { Linkedin, Facebook, Instagram, ExternalLink } from 'lucide-react'
+import { Linkedin, Facebook, Instagram } from 'lucide-react'
 import { t, Language } from '../../i18n/translations'
 
 interface FooterSectionProps {
@@ -11,14 +11,6 @@ export default function FooterSection({ language }: FooterSectionProps) {
       { name: 'LinkedIn', href: 'https://www.linkedin.com/company/ntglobal-nextech/', icon: Linkedin },
       { name: 'Facebook', href: 'https://www.facebook.com/NexTechPage', icon: Facebook },
       { name: 'Instagram', href: 'https://www.instagram.com/nextechofficial_', icon: Instagram },
-    ],
-    resources: [
-      {
-        name: language === 'zh' ? '文档' : 'Documentation',
-        href: 'https://github.com/NoFxAiOS/nofx/blob/main/README.md',
-      },
-      { name: 'Issues', href: 'https://github.com/NoFxAiOS/nofx/issues' },
-      { name: 'Pull Requests', href: 'https://github.com/NoFxAiOS/nofx/pulls' },
     ],
     supporters: [
       { name: 'Binance', href: 'https://www.binance.com/join?ref=NOFXENG' },
@@ -37,7 +29,7 @@ export default function FooterSection({ language }: FooterSectionProps) {
     <footer style={{ background: '#0B0E11', borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}>
       <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
         {/* Top Section */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-10 mb-8 md:mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 mb-8 md:mb-12">
           {/* Brand */}
           <div className="md:col-span-1">
             <div className="flex items-center gap-3 mb-4">
@@ -86,29 +78,6 @@ export default function FooterSection({ language }: FooterSectionProps) {
                     style={{ color: '#5E6673' }}
                   >
                     {link.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Resources */}
-          <div>
-            <h4 className="text-sm font-semibold mb-4" style={{ color: '#EAECEF' }}>
-              {t('resources', language)}
-            </h4>
-            <ul className="space-y-3">
-              {links.resources.map((link) => (
-                <li key={link.name}>
-                  <a
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm transition-colors hover:text-[#F0B90B] inline-flex items-center gap-1"
-                    style={{ color: '#5E6673' }}
-                  >
-                    {link.name}
-                    <ExternalLink className="w-3 h-3 opacity-50" />
                   </a>
                 </li>
               ))}
