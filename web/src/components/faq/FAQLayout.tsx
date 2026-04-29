@@ -145,11 +145,9 @@ export function FAQLayout({ language }: FAQLayoutProps) {
             {t('faqContactUs', language)}
           </p>
           <div className="flex items-center justify-center gap-4">
-            <a
-              href="https://github.com/NoFxAiOS/nofx"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-3 rounded-lg font-semibold transition-all hover:scale-105"
+            <button
+              type="button"
+              className="px-6 py-3 rounded-lg font-semibold transition-all"
               style={{
                 background: '#1E2329',
                 color: '#EAECEF',
@@ -157,19 +155,17 @@ export function FAQLayout({ language }: FAQLayoutProps) {
               }}
             >
               GitHub
-            </a>
-            <a
-              href="https://t.me/nofx_dev_community"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-3 rounded-lg font-semibold transition-all hover:scale-105"
+            </button>
+            <button
+              type="button"
+              className="px-6 py-3 rounded-lg font-semibold transition-all"
               style={{
                 background: 'linear-gradient(135deg, #F0B90B 0%, #FCD535 100%)',
                 color: '#0B0E11',
               }}
             >
               {t('community', language)}
-            </a>
+            </button>
           </div>
         </div>
       </div>
