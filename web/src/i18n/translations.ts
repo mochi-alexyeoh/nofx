@@ -829,7 +829,7 @@ export const translations = {
 
     faqCanNOFXStealFunds: 'Can NexTechAI steal my funds?',
     faqCanNOFXStealFundsAnswer:
-      'NexTechAI is open-source (AGPL-3.0 license) - you can audit all code on GitHub. API keys are stored locally on YOUR machine, never sent to external servers. NexTechAI only has the permissions you grant via API keys. For maximum safety: use API keys with trading-only permissions (no withdrawal), enable IP whitelist, use a dedicated subaccount.',
+      'API keys are stored locally on YOUR machine, never sent to external servers. NexTechAI only has the permissions you grant via API keys. For maximum safety: use API keys with trading-only permissions (no withdrawal), enable IP whitelist, use a dedicated subaccount.',
 
     // ===== FEATURES =====
     faqStrategyStudio: 'What is Strategy Studio?',
