@@ -24,7 +24,7 @@ export const translations = {
     faqNav: 'FAQ',
 
     // Footer
-    footerTitle: 'NOFX - AI Trading System',
+    footerTitle: 'NexTech - AI Trading System',
     footerWarning: '⚠️ Trading involves risk. Use at your own discretion.',
 
     // Stats Cards
@@ -1386,7 +1386,7 @@ export const translations = {
     faqNav: '常见问题',
 
     // Footer
-    footerTitle: 'NOFX - AI交易系统',
+    footerTitle: 'NexTech - AI交易系统',
     footerWarning: '⚠️ 交易有风险，请谨慎使用。',
 
     // Stats Cards
@@ -2688,7 +2688,7 @@ export const translations = {
     faqNav: 'FAQ',
 
     // Footer
-    footerTitle: 'NOFX - Sistem Trading AI',
+    footerTitle: 'NexTech - Sistem Trading AI',
     footerWarning: '⚠️ Trading memiliki risiko. Gunakan dengan bijak.',
 
     // Stats Cards
