@@ -168,7 +168,7 @@ export default function TerminalHero() {
                         </h1>
 
                         <p className="max-w-xl text-zinc-200 md:text-zinc-400 text-lg mb-6 font-light leading-relaxed drop-shadow-md">
-                            The World's First Open-Source Agentic Trading OS.
+                            NexTech AI Agentic Trading Platform.
                             Deploy autonomous high-frequency trading agents powered by advanced LLMs.
                         </p>
                     </div>
