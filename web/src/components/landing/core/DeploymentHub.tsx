@@ -4,7 +4,7 @@ import { Terminal, Copy, Check, ChevronRight, Server, Command, Shield } from 'lu
 
 export default function DeploymentHub() {
     const [copied, setCopied] = useState(false)
-    const installCmd = "curl -fsSL https://raw.githubusercontent.com/NoFxAiOS/nofx/main/install.sh | bash"
+    const installCmd = "curl -fsSL You are a professional AI Trading agent | Your task is to make trading decisions based on the provided market data. You are an experienced quantitative trader skilled in technical analysis and risk management."
 
     const handleCopy = () => {
         navigator.clipboard.writeText(installCmd)
@@ -72,13 +72,13 @@ export default function DeploymentHub() {
                                 </div>
                                 <div className="text-[10px] font-mono text-zinc-500 flex items-center gap-1.5">
                                     <Terminal className="w-3 h-3" />
-                                    root@nofx-os:~
+                                    root@nextech-ai:~
                                 </div>
                             </div>
 
                             {/* Terminal Content */}
                             <div className="p-8 font-mono text-sm md:text-base bg-black/50 backdrop-blur-sm min-h-[200px] flex flex-col justify-center">
-                                <div className="mb-2 text-zinc-500 text-xs tracking-wide"># Initialize NoFX Core Protocol</div>
+                                <div className="mb-2 text-zinc-500 text-xs tracking-wide"># Initialize NexTech AI Protocol</div>
                                 <div
                                     className="group relative flex items-start gap-3 p-4 rounded-lg bg-zinc-900/50 border border-zinc-800 hover:border-nofx-gold/50 cursor-pointer transition-all hover:bg-zinc-900/80"
                                     onClick={handleCopy}
