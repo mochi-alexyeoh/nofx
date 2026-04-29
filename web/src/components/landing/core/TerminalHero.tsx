@@ -1,6 +1,5 @@
-import { ArrowRight, Shield, Activity, CircuitBoard, Wifi, Globe, Zap, Star, GitFork, Users, MessageCircle } from 'lucide-react'
+import { ArrowRight, Shield, Activity, CircuitBoard, Wifi, Globe, Zap } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { useGitHubStats } from '../../../hooks/useGitHubStats'
 import AgentTerminal from '../brand/AgentTerminal'
 
 export default function TerminalHero() {
@@ -219,7 +218,6 @@ export default function TerminalHero() {
                     </div>
 
                     {/* Community Stats Row */}
-                    <CommunityStats />
 
                 </div>
             </div>
@@ -277,59 +275,3 @@ export default function TerminalHero() {
     )
 }
 
-import { OFFICIAL_LINKS } from '../../../constants/branding'
-
-function CommunityStats() {
-    const { stars, forks, contributors, isLoading, error } = useGitHubStats('NoFxAiOS', 'nofx')
-
-    const stats = [
-        {
-            label: 'GITHUB STARS',
-            value: isLoading ? '...' : (error ? '10,500+' : stars.toLocaleString()),
-            icon: Star,
-            color: 'text-yellow-400',
-            href: OFFICIAL_LINKS.github
-        },
-        {
-            label: 'FORKS',
-            value: isLoading ? '...' : (error ? '2,800+' : forks.toLocaleString()),
-            icon: GitFork,
-            color: 'text-blue-400',
-            href: `${OFFICIAL_LINKS.github}/fork`
-        },
-        {
-            label: 'CONTRIBUTORS',
-            value: isLoading ? '...' : (contributors > 0 ? contributors : '50+'),
-            icon: Users,
-            color: 'text-green-400',
-            href: `${OFFICIAL_LINKS.github}/graphs/contributors`
-        },
-        {
-            label: 'DEV COMMUNITY',
-            value: '6,600+',
-            icon: MessageCircle,
-            color: 'text-blue-500',
-            href: OFFICIAL_LINKS.telegram
-        }
-    ]
-
-    return (
-        <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-4xl">
-            {stats.map((stat, i) => (
-                <a
-                    key={i}
-                    href={stat.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex flex-col items-center justify-center p-3 rounded bg-black/40 border border-zinc-800/50 backdrop-blur-sm group hover:border-nofx-gold/30 transition-all cursor-pointer hover:bg-white/5"
-                >
-                    <div className="flex items-center gap-2 mb-1">
-                        <stat.icon className={`w-4 h-4 ${stat.color}`} />
-                        <span className="text-[10px] font-mono text-zinc-500 tracking-wider">{stat.label}</span>
-                    </div>
-                    <span className="text-xl font-bold font-mono text-white group-hover:text-nofx-gold transition-colors">{stat.value}</span>
-                </a>
-            ))}
-        </div>
-    )
-}
