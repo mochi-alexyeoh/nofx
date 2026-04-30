@@ -119,7 +119,7 @@ export function RegisterPage() {
       className="min-h-screen flex items-center justify-center py-12 font-mono"
       disableAnimation
     >
-      <div className="w-full max-w-lg relative z-10 px-6">
+      <div className="w-full max-w-lg mx-auto relative z-10 px-6">
         <div className="flex justify-between items-center mb-8">
           <button
             onClick={() => navigate('/')}
