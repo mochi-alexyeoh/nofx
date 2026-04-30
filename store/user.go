@@ -1,6 +1,7 @@
 package store
 
 import (
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -16,6 +17,7 @@ type User struct {
 	ID           string    `gorm:"primaryKey" json:"id"`
 	Email        string    `gorm:"uniqueIndex:idx_users_email;not null" json:"email"`
 	PasswordHash string    `gorm:"column:password_hash;not null" json:"-"`
+	Role         string    `gorm:"column:role;size:20;default:user" json:"role"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 }
@@ -38,6 +40,7 @@ func (s *UserStore) initTables() error {
 			// Core columns (should already exist)
 			s.db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT NOT NULL DEFAULT ''`)
 			s.db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT NOT NULL DEFAULT ''`)
+			s.db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'user'`)
 			s.db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`)
 			s.db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`)
 
@@ -81,6 +84,15 @@ func (s *UserStore) GetByID(userID string) (*User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (s *UserStore) IsAdmin(userID string) (bool, error) {
+	var role string
+	err := s.db.Model(&User{}).Where("id = ?", userID).Select("role").Scan(&role).Error
+	if err != nil {
+		return false, err
+	}
+	return strings.EqualFold(role, "admin"), nil
 }
 
 // Count returns the total number of users
@@ -128,5 +140,6 @@ func (s *UserStore) EnsureAdmin() error {
 		ID:           "admin",
 		Email:        "admin@localhost",
 		PasswordHash: "",
+		Role:         "admin",
 	})
 }

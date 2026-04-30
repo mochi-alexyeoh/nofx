@@ -1,6 +1,8 @@
 export interface SystemConfig {
   initialized: boolean
   beta_mode?: boolean
+  registration_enabled?: boolean
+  registration_invite_only?: boolean
 }
 
 let configPromise: Promise<SystemConfig> | null = null

@@ -30,7 +30,7 @@ interface AuthContextType {
   register: (
     email: string,
     password: string,
-    betaCode?: string,
+    inviteCode?: string,
     mode?: UserMode
   ) => Promise<{ success: boolean; message?: string }>
   resetPassword: (
@@ -206,17 +206,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = async (
     email: string,
     password: string,
-    betaCode?: string,
+    inviteCode?: string,
     mode?: UserMode
   ) => {
     const requestBody: {
       email: string
       password: string
-      beta_code?: string
+      invite_code?: string
       lang?: string
     } = { email, password, lang: language }
-    if (betaCode) {
-      requestBody.beta_code = betaCode
+    if (inviteCode) {
+      requestBody.invite_code = inviteCode
     }
 
     try {

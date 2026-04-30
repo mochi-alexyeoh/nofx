@@ -29,6 +29,7 @@ type Store struct {
 	order          *OrderStore
 	grid           *GridStore
 	aiCharge       *AIChargeStore
+	inviteCode     *InviteCodeStore
 	telegramConfig TelegramConfigStore
 
 	mu sync.RWMutex
@@ -164,6 +165,9 @@ func (s *Store) initTables() error {
 	if err := s.AICharge().initTables(); err != nil {
 		return fmt.Errorf("failed to initialize AI charge tables: %w", err)
 	}
+	if err := s.InviteCode().initTables(); err != nil {
+		return fmt.Errorf("failed to initialize invite code tables: %w", err)
+	}
 	return nil
 }
 
@@ -295,6 +299,16 @@ func (s *Store) AICharge() *AIChargeStore {
 		s.aiCharge = NewAIChargeStore(s.gdb)
 	}
 	return s.aiCharge
+}
+
+// InviteCode gets invite code storage
+func (s *Store) InviteCode() *InviteCodeStore {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.inviteCode == nil {
+		s.inviteCode = NewInviteCodeStore(s.gdb)
+	}
+	return s.inviteCode
 }
 
 // TelegramConfig gets Telegram bot configuration storage

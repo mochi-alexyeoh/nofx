@@ -135,6 +135,12 @@ func (s *Server) setupRoutes() {
 			s.routeWithSchema(protected, "PUT", "/user/password", "Change current user password",
 				`Body: {"new_password":"<string, min 8 chars>"}`,
 				s.handleChangePassword)
+			s.routeWithSchema(protected, "POST", "/invite-codes/generate", "Generate one-time invite codes (admin)",
+				`Body: {"count":<int, default 1, max 200>}`,
+				s.handleGenerateInviteCodes)
+			s.routeWithSchema(protected, "GET", "/invite-codes", "List invite codes (admin)",
+				`Query: ?limit=<int, default 200, max 500>`,
+				s.handleListInviteCodes)
 
 			// Server IP query (requires authentication, for whitelist configuration)
 			s.route(protected, "GET", "/server-ip", "Get server public IP (for exchange whitelist)", s.handleGetServerIP)
@@ -375,10 +381,26 @@ func (s *Server) handleHealth(c *gin.Context) {
 // handleGetSystemConfig Get system configuration (configuration that client needs to know)
 func (s *Server) handleGetSystemConfig(c *gin.Context) {
 	userCount, _ := s.store.User().Count()
+	registrationEnabled := true
+	if v, err := s.store.GetSystemConfig("registration_enabled"); err == nil {
+		switch strings.ToLower(strings.TrimSpace(v)) {
+		case "false", "0", "off", "no":
+			registrationEnabled = false
+		}
+	}
+	inviteOnly := true
+	if v, err := s.store.GetSystemConfig("registration_invite_only"); err == nil {
+		switch strings.ToLower(strings.TrimSpace(v)) {
+		case "false", "0", "off", "no":
+			inviteOnly = false
+		}
+	}
 	c.JSON(http.StatusOK, gin.H{
-		"initialized":      userCount > 0,
-		"btc_eth_leverage": 10,
-		"altcoin_leverage": 5,
+		"initialized":               userCount > 0,
+		"registration_enabled":      registrationEnabled,
+		"registration_invite_only":  inviteOnly,
+		"btc_eth_leverage":          10,
+		"altcoin_leverage":          5,
 	})
 }
 

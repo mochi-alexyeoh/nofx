@@ -19,8 +19,8 @@ export function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [betaCode, setBetaCode] = useState('')
-  const [betaMode, setBetaMode] = useState(false)
+  const [inviteCode, setInviteCode] = useState('')
+  const [inviteOnly, setInviteOnly] = useState(true)
   const [registrationEnabled, setRegistrationEnabled] = useState(true)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -31,8 +31,8 @@ export function RegisterPage() {
   useEffect(() => {
     getSystemConfig()
       .then((config) => {
-        setBetaMode(config.beta_mode || false)
-        setRegistrationEnabled(config.initialized === false)
+        setInviteOnly(config.registration_invite_only !== false)
+        setRegistrationEnabled(config.registration_enabled !== false)
       })
       .catch((err) => {
         console.error('Failed to fetch system config:', err)
@@ -56,8 +56,8 @@ export function RegisterPage() {
       return
     }
 
-    if (betaMode && !betaCode.trim()) {
-      setError('内测期间，注册需要提供内测码')
+    if (inviteOnly && !inviteCode.trim()) {
+      setError('Invite code is required')
       return
     }
 
@@ -66,7 +66,7 @@ export function RegisterPage() {
       const result = await register(
         email,
         password,
-        betaCode.trim() || undefined
+        inviteCode.trim() || undefined
       )
 
       const isWhitelistError = (msg: string) => {
@@ -179,7 +179,7 @@ export function RegisterPage() {
               </div>
               <div className="flex gap-2">
                 <span className="text-emerald-500">➜</span>
-                <span>Mode: {betaMode ? 'CLOSED_BETA CA1' : 'PUBLIC'}</span>
+                <span>Mode: {inviteOnly ? 'INVITE_ONLY' : 'PUBLIC'}</span>
               </div>
             </div>
 
@@ -285,23 +285,23 @@ export function RegisterPage() {
                 </div>
               </div>
 
-              {betaMode && (
+              {inviteOnly && (
                 <div>
                   <label className="block text-xs uppercase tracking-wider text-nofx-gold mb-1.5 ml-1 font-bold">
-                    Priority Access Code
+                    Invite Code
                   </label>
                   <input
                     type="text"
-                    value={betaCode}
+                    value={inviteCode}
                     onChange={(e) =>
-                      setBetaCode(
-                        e.target.value.replace(/[^a-z0-9]/gi, '').toLowerCase()
+                      setInviteCode(
+                        e.target.value.replace(/[^a-z0-9-]/gi, '').toUpperCase()
                       )
                     }
                     className="w-full bg-black/50 border border-zinc-700 rounded px-4 py-3 text-sm focus:border-nofx-gold focus:ring-1 focus:ring-nofx-gold/50 outline-none transition-all placeholder-zinc-800 text-white font-mono tracking-widest"
-                    placeholder="XXXXXX"
-                    maxLength={6}
-                    required={betaMode}
+                    placeholder="ABCD1-EFGH-IJKL"
+                    maxLength={24}
+                    required={inviteOnly}
                   />
                   <p className="text-[10px] text-zinc-600 font-mono mt-1 ml-1">
                     * CASE SENSITIVE ALPHANUMERIC
@@ -318,7 +318,7 @@ export function RegisterPage() {
               <button
                 type="submit"
                 disabled={
-                  loading || (betaMode && !betaCode.trim()) || !passwordValid
+                  loading || (inviteOnly && !inviteCode.trim()) || !passwordValid
                 }
                 className="w-full bg-nofx-gold text-black font-bold py-3 px-4 rounded text-sm tracking-wide uppercase hover:bg-yellow-400 transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed font-mono shadow-[0_0_15px_rgba(255,215,0,0.1)] hover:shadow-[0_0_25px_rgba(255,215,0,0.25)] flex items-center justify-center gap-2 group mt-4"
               >

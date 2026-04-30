@@ -1,8 +1,11 @@
 package api
 
 import (
+	"crypto/rand"
+	"encoding/base32"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -53,15 +56,14 @@ func (s *Server) handleRegister(c *gin.Context) {
 		return
 	}
 
-	if userCount > 0 {
-		c.JSON(http.StatusForbidden, gin.H{"error": "System already initialized"})
-		return
-	}
+	inviteOnly := s.isInviteOnlyRegistrationEnabled()
 
 	var req struct {
-		Email    string `json:"email" binding:"required,email"`
-		Password string `json:"password" binding:"required,min=6"`
-		Lang     string `json:"lang"`
+		Email      string `json:"email" binding:"required,email"`
+		Password   string `json:"password" binding:"required,min=6"`
+		InviteCode string `json:"invite_code"`
+		BetaCode   string `json:"beta_code"` // backward compatibility
+		Lang       string `json:"lang"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -72,6 +74,26 @@ func (s *Server) handleRegister(c *gin.Context) {
 	lang := req.Lang
 	if lang != "zh" && lang != "id" {
 		lang = "en"
+	}
+
+	inviteCode := strings.TrimSpace(req.InviteCode)
+	if inviteCode == "" {
+		inviteCode = strings.TrimSpace(req.BetaCode)
+	}
+	if inviteOnly && userCount > 0 {
+		if inviteCode == "" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Invite code required"})
+			return
+		}
+		ok, err := s.store.InviteCode().IsUsable(inviteCode)
+		if err != nil {
+			SafeInternalError(c, "Failed to validate invite code", err)
+			return
+		}
+		if !ok {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Invalid or used invite code"})
+			return
+		}
 	}
 
 	// Check if email already exists
@@ -90,14 +112,37 @@ func (s *Server) handleRegister(c *gin.Context) {
 
 	// Create user
 	userID := uuid.New().String()
+	role := "user"
+	if userCount == 0 {
+		role = "admin"
+	}
 	user := &store.User{
 		ID:           userID,
 		Email:        req.Email,
 		PasswordHash: passwordHash,
+		Role:         role,
 	}
 
-	err = s.store.User().Create(user)
+	err = s.store.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(user).Error; err != nil {
+			return err
+		}
+		if inviteOnly && userCount > 0 {
+			ok, err := store.NewInviteCodeStore(tx).Consume(inviteCode, user.ID)
+			if err != nil {
+				return err
+			}
+			if !ok {
+				return fmt.Errorf("invalid or used invite code")
+			}
+		}
+		return nil
+	})
 	if err != nil {
+		if strings.Contains(strings.ToLower(err.Error()), "invite") {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Invalid or used invite code"})
+			return
+		}
 		SafeInternalError(c, "Failed to create user", err)
 		return
 	}
@@ -248,6 +293,101 @@ func (s *Server) handleResetAccount(c *gin.Context) {
 
 	logger.Infof("✓ User accounts cleared (wallets preserved) — system reset to uninitialized")
 	c.JSON(http.StatusOK, gin.H{"message": "Account reset successful, you can now register a new account"})
+}
+
+func (s *Server) isInviteOnlyRegistrationEnabled() bool {
+	v, err := s.store.GetSystemConfig("registration_invite_only")
+	if err != nil {
+		return true
+	}
+	v = strings.ToLower(strings.TrimSpace(v))
+	if v == "" {
+		return true
+	}
+	return !(v == "false" || v == "0" || v == "off" || v == "no")
+}
+
+func (s *Server) isAdminUser(userID string) bool {
+	ok, err := s.store.User().IsAdmin(userID)
+	if err != nil {
+		return false
+	}
+	return ok
+}
+
+func (s *Server) handleGenerateInviteCodes(c *gin.Context) {
+	userID := c.GetString("user_id")
+	if !s.isAdminUser(userID) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Admin only"})
+		return
+	}
+
+	var req struct {
+		Count int `json:"count"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		SafeBadRequest(c, "Invalid request parameters")
+		return
+	}
+	if req.Count <= 0 {
+		req.Count = 1
+	}
+	if req.Count > 200 {
+		SafeBadRequest(c, "count too large (max 200)")
+		return
+	}
+
+	codes := make([]string, 0, req.Count)
+	for len(codes) < req.Count {
+		code, err := generateInviteCode()
+		if err != nil {
+			SafeInternalError(c, "Failed to generate invite code", err)
+			return
+		}
+		if err := s.store.InviteCode().Create(code, userID); err != nil {
+			if strings.Contains(strings.ToLower(err.Error()), "unique") || strings.Contains(strings.ToLower(err.Error()), "duplicate") {
+				continue
+			}
+			SafeInternalError(c, "Failed to save invite code", err)
+			return
+		}
+		codes = append(codes, code)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"count": req.Count, "codes": codes})
+}
+
+func (s *Server) handleListInviteCodes(c *gin.Context) {
+	userID := c.GetString("user_id")
+	if !s.isAdminUser(userID) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Admin only"})
+		return
+	}
+	limit := 200
+	if q := c.Query("limit"); q != "" {
+		if v, err := strconv.Atoi(q); err == nil {
+			limit = v
+		}
+	}
+	items, err := s.store.InviteCode().List(limit)
+	if err != nil {
+		SafeInternalError(c, "Failed to list invite codes", err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"items": items})
+}
+
+func generateInviteCode() (string, error) {
+	buf := make([]byte, 8)
+	if _, err := rand.Read(buf); err != nil {
+		return "", err
+	}
+	encoded := base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(buf)
+	encoded = strings.ToUpper(encoded)
+	if len(encoded) < 13 {
+		return encoded, nil
+	}
+	return encoded[:5] + "-" + encoded[5:9] + "-" + encoded[9:13], nil
 }
 
 // adoptOrphanRecords re-assigns ai_models and exchanges whose user_id no longer
