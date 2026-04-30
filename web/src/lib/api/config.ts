@@ -7,6 +7,7 @@ import type {
   CreateExchangeRequest,
   BeginnerOnboardingResponse,
   CurrentBeginnerWalletResponse,
+  InviteCodeItem,
 } from '../../types'
 import { API_BASE, httpClient, CryptoService } from './helpers'
 
@@ -215,5 +216,26 @@ export const configApi = {
       throw new Error(result.message || 'Failed to fetch current beginner wallet')
     }
     return result.data
+  },
+
+  async generateInviteCodes(count = 1): Promise<string[]> {
+    const result = await httpClient.post<{ count: number; codes: string[] }>(
+      `${API_BASE}/invite-codes/generate`,
+      { count }
+    )
+    if (!result.success || !result.data) {
+      throw new Error(result.message || 'Failed to generate invite codes')
+    }
+    return Array.isArray(result.data.codes) ? result.data.codes : []
+  },
+
+  async listInviteCodes(limit = 200): Promise<InviteCodeItem[]> {
+    const result = await httpClient.get<{ items: InviteCodeItem[] }>(
+      `${API_BASE}/invite-codes?limit=${encodeURIComponent(String(limit))}`
+    )
+    if (!result.success || !result.data) {
+      throw new Error(result.message || 'Failed to fetch invite codes')
+    }
+    return Array.isArray(result.data.items) ? result.data.items : []
   },
 }

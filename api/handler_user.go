@@ -168,6 +168,7 @@ func (s *Server) handleRegister(c *gin.Context) {
 		"token":   token,
 		"user_id": user.ID,
 		"email":   user.Email,
+		"role":    user.Role,
 		"message": "Registration successful",
 	})
 }
@@ -208,6 +209,7 @@ func (s *Server) handleLogin(c *gin.Context) {
 		"token":   token,
 		"user_id": user.ID,
 		"email":   user.Email,
+		"role":    user.Role,
 		"message": "Login successful",
 	})
 }

@@ -167,3 +167,12 @@ export interface CurrentBeginnerWalletResponse {
   source?: string
   claw402_status?: string
 }
+
+export interface InviteCodeItem {
+  code: string
+  created_by?: string
+  used_by?: string
+  used_at?: string | null
+  created_at?: string
+  updated_at?: string
+}

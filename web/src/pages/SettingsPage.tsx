@@ -5,6 +5,7 @@ import {
   Cpu,
   Building2,
   MessageCircle,
+  Shield,
   Eye,
   EyeOff,
   ChevronRight,
@@ -17,9 +18,9 @@ import { api } from '../lib/api'
 import { ExchangeConfigModal } from '../components/trader/ExchangeConfigModal'
 import { TelegramConfigModal } from '../components/trader/TelegramConfigModal'
 import { ModelConfigModal } from '../components/trader/ModelConfigModal'
-import type { Exchange, AIModel } from '../types'
+import type { Exchange, AIModel, InviteCodeItem } from '../types'
 
-type Tab = 'account' | 'models' | 'exchanges' | 'telegram'
+type Tab = 'account' | 'models' | 'exchanges' | 'telegram' | 'admin'
 
 function configBadge(label: string, active: boolean) {
   return (
@@ -59,6 +60,14 @@ export function SettingsPage() {
   // Telegram state
   const [showTelegramModal, setShowTelegramModal] = useState(false)
 
+  // Admin invite management
+  const [inviteCodes, setInviteCodes] = useState<InviteCodeItem[]>([])
+  const [inviteCount, setInviteCount] = useState(10)
+  const [generatedCodes, setGeneratedCodes] = useState<string[]>([])
+  const [loadingInvites, setLoadingInvites] = useState(false)
+  const [generatingInvites, setGeneratingInvites] = useState(false)
+  const isAdmin = user?.role === 'admin'
+
   const refreshModelConfigs = async () => {
     const [configs, supported] = await Promise.all([
       api.getModelConfigs(),
@@ -83,7 +92,14 @@ export function SettingsPage() {
       refreshExchangeConfigs()
         .catch(() => toast.error('Failed to load exchanges'))
     }
-  }, [activeTab])
+    if (activeTab === 'admin' && isAdmin) {
+      setLoadingInvites(true)
+      api.listInviteCodes(300)
+        .then((rows) => setInviteCodes(rows))
+        .catch(() => toast.error('Failed to load invite codes'))
+        .finally(() => setLoadingInvites(false))
+    }
+  }, [activeTab, isAdmin])
 
   useEffect(() => {
     const handleRefresh = () => {
@@ -306,11 +322,42 @@ export function SettingsPage() {
     }
   }
 
+  const refreshInvites = async () => {
+    const rows = await api.listInviteCodes(300)
+    setInviteCodes(rows)
+  }
+
+  const handleGenerateInvites = async () => {
+    const count = Math.max(1, Math.min(200, Math.floor(inviteCount || 1)))
+    setGeneratingInvites(true)
+    try {
+      const codes = await api.generateInviteCodes(count)
+      setGeneratedCodes(codes)
+      await refreshInvites()
+      toast.success(`Generated ${codes.length} invite code(s)`)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to generate invite codes')
+    } finally {
+      setGeneratingInvites(false)
+    }
+  }
+
+  const handleCopyGenerated = async () => {
+    if (!generatedCodes.length) return
+    try {
+      await navigator.clipboard.writeText(generatedCodes.join('\n'))
+      toast.success('Copied generated invite codes')
+    } catch {
+      toast.error('Failed to copy')
+    }
+  }
+
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
     { key: 'account', label: 'Account', icon: <User size={16} /> },
     { key: 'models', label: 'AI Models', icon: <Cpu size={16} /> },
     { key: 'exchanges', label: 'Exchanges', icon: <Building2 size={16} /> },
     { key: 'telegram', label: 'Telegram', icon: <MessageCircle size={16} /> },
+    ...(isAdmin ? [{ key: 'admin' as const, label: 'Admin', icon: <Shield size={16} /> }] : []),
   ]
 
   return (
@@ -545,6 +592,88 @@ export function SettingsPage() {
                   className="text-zinc-600 group-hover:text-zinc-400 transition-colors"
                 />
               </button>
+            </div>
+          )}
+
+          {/* Admin Tab */}
+          {activeTab === 'admin' && isAdmin && (
+            <div className="space-y-5">
+              <div className="rounded-xl border border-zinc-700/70 bg-zinc-900/50 p-4 space-y-3">
+                <h3 className="text-sm font-semibold text-white">Invite Code Generator</h3>
+                <p className="text-xs text-zinc-400">Generate one-time codes for new user registration.</p>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="number"
+                    min={1}
+                    max={200}
+                    value={inviteCount}
+                    onChange={(e) => setInviteCount(Number(e.target.value || 1))}
+                    className="w-28 bg-zinc-950/80 border border-zinc-700/80 rounded-xl px-3 py-2 text-sm text-white"
+                  />
+                  <button
+                    onClick={handleGenerateInvites}
+                    disabled={generatingInvites}
+                    className="bg-nofx-gold hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded-xl text-sm disabled:opacity-60"
+                  >
+                    {generatingInvites ? 'Generating...' : 'Generate'}
+                  </button>
+                  <button
+                    onClick={handleCopyGenerated}
+                    disabled={!generatedCodes.length}
+                    className="bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium px-4 py-2 rounded-xl text-sm disabled:opacity-50"
+                  >
+                    Copy latest
+                  </button>
+                </div>
+                {!!generatedCodes.length && (
+                  <textarea
+                    readOnly
+                    value={generatedCodes.join('\n')}
+                    className="w-full min-h-[120px] bg-zinc-950/80 border border-zinc-700/80 rounded-xl px-3 py-2 text-xs text-emerald-300 font-mono"
+                  />
+                )}
+              </div>
+
+              <div className="rounded-xl border border-zinc-700/70 bg-zinc-900/50 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold text-white">Invite Code History</h3>
+                  <button
+                    onClick={() => {
+                      setLoadingInvites(true)
+                      refreshInvites().finally(() => setLoadingInvites(false))
+                    }}
+                    className="text-xs px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200"
+                  >
+                    Refresh
+                  </button>
+                </div>
+                {loadingInvites ? (
+                  <div className="text-sm text-zinc-500">Loading...</div>
+                ) : inviteCodes.length === 0 ? (
+                  <div className="text-sm text-zinc-500">No invite codes yet.</div>
+                ) : (
+                  <div className="space-y-2 max-h-[360px] overflow-auto pr-1">
+                    {inviteCodes.map((item) => (
+                      <div
+                        key={`${item.code}-${item.created_at || ''}`}
+                        className="rounded-lg border border-zinc-800 bg-zinc-950/70 px-3 py-2"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <code className="text-xs text-emerald-300 font-mono">{item.code}</code>
+                          <span className={`text-[11px] px-2 py-0.5 rounded-full ${item.used_at ? 'bg-zinc-700 text-zinc-300' : 'bg-emerald-500/10 text-emerald-300'}`}>
+                            {item.used_at ? 'Used' : 'Unused'}
+                          </span>
+                        </div>
+                        <div className="mt-1 text-[11px] text-zinc-500">
+                          {item.used_at
+                            ? `Used by ${item.used_by || 'unknown'} at ${item.used_at}`
+                            : `Created at ${item.created_at || '-'}`}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>

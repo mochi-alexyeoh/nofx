@@ -10,6 +10,7 @@ import { useLanguage } from './LanguageContext'
 interface User {
   id: string
   email: string
+  role?: string
 }
 
 interface AuthContextType {
@@ -140,7 +141,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (response.ok) {
         if (data.token) {
-          const userInfo = { id: data.user_id, email: data.email }
+          const userInfo = { id: data.user_id, email: data.email, role: data.role }
           handlePostAuthSuccess(data.token, userInfo, mode)
 
           return { success: true, message: data.message }
@@ -177,6 +178,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const userInfo = {
           id: data.user_id || 'admin',
           email: data.email || 'admin@localhost',
+          role: data.role || 'admin',
         }
         localStorage.setItem('auth_token', data.token)
         localStorage.setItem('auth_user', JSON.stringify(userInfo))
@@ -224,6 +226,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         token: string
         user_id: string
         email: string
+        role?: string
         message: string
       }>('/api/register', requestBody)
 
@@ -232,7 +235,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem('nofx_beginner_onboarding_completed')
         localStorage.removeItem('nofx_beginner_wallet_address')
 
-        const userInfo = { id: result.data.user_id, email: result.data.email }
+        const userInfo = {
+          id: result.data.user_id,
+          email: result.data.email,
+          role: result.data.role,
+        }
         handlePostAuthSuccess(result.data.token, userInfo, mode)
 
         return {
