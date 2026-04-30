@@ -9,7 +9,6 @@ import { DeepVoidBackground } from '../common/DeepVoidBackground'
 import { LanguageSwitcher } from '../common/LanguageSwitcher'
 import { OnboardingModeSelector } from './OnboardingModeSelector'
 import type { UserMode } from '../../lib/onboarding'
-import { invalidateSystemConfig } from '../../lib/config'
 
 export function LoginPage() {
   const { language } = useLanguage()
@@ -42,29 +41,6 @@ export function LoginPage() {
       sessionStorage.removeItem('from401')
     }
   }, [language])
-
-  const handleResetAccount = async () => {
-    if (!window.confirm(t('forgotAccountConfirm', language))) return
-    try {
-      const res = await fetch('/api/reset-account', { method: 'POST' })
-      if (res.ok) {
-        localStorage.removeItem('auth_token')
-        localStorage.removeItem('auth_user')
-        localStorage.removeItem('user_id')
-        sessionStorage.removeItem('from401')
-        invalidateSystemConfig()
-        toast.success(t('forgotAccountSuccess', language))
-        setTimeout(() => {
-          navigate('/setup')
-        }, 1500)
-      } else {
-        const data = await res.json()
-        toast.error(data.error || 'Reset failed')
-      }
-    } catch {
-      toast.error('Network error')
-    }
-  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -182,15 +158,6 @@ export function LoginPage() {
               </button>
             </form>
 
-            <div className="mt-4 text-center">
-              <button
-                type="button"
-                onClick={handleResetAccount}
-                className="text-xs text-zinc-600 hover:text-red-400 transition-colors"
-              >
-                {t('forgotAccount', language)}
-              </button>
-            </div>
           </div>
         </div>
       </div>

@@ -328,6 +328,13 @@ export default function HeaderBar({
                   >
                     {t('signIn', language)}
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => navigateInApp(ROUTES.register)}
+                    className="px-3 py-2 text-sm font-semibold transition-colors rounded bg-nofx-gold text-black hover:bg-yellow-400"
+                  >
+                    {t('signUp', language) || 'Sign Up'}
+                  </button>
                 </div>
               )
             )}
@@ -629,16 +636,28 @@ export default function HeaderBar({
                   ) : (
                     resolvedCurrentPage !== 'login' &&
                     resolvedCurrentPage !== 'register' && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          navigateInApp(ROUTES.login)
-                          setMobileMenuOpen(false)
-                        }}
-                        className="flex items-center justify-center bg-nofx-gold text-black rounded-lg font-bold text-sm hover:bg-yellow-400 transition-colors"
-                      >
-                        {t('signIn', language)}
-                      </button>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigateInApp(ROUTES.login)
+                            setMobileMenuOpen(false)
+                          }}
+                          className="flex items-center justify-center bg-nofx-gold text-black rounded-lg font-bold text-sm hover:bg-yellow-400 transition-colors"
+                        >
+                          {t('signIn', language)}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigateInApp(ROUTES.register)
+                            setMobileMenuOpen(false)
+                          }}
+                          className="flex items-center justify-center border border-zinc-700 text-zinc-200 rounded-lg font-bold text-sm hover:bg-zinc-800 transition-colors"
+                        >
+                          {t('signUp', language) || 'Sign Up'}
+                        </button>
+                      </div>
                     )
                   )}
                 </div>
