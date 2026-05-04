@@ -38,8 +38,16 @@ export function getModelDisplayName(modelId: string): string {
 
 // Extract name part after underscore
 export function getShortName(fullName: string): string {
-  const parts = fullName.split('_')
-  return parts.length > 1 ? parts[parts.length - 1] : fullName
+  const raw = (fullName || '').trim()
+  const normalized = raw.toLowerCase()
+
+  // Branding override
+  if (normalized.includes('claw402')) {
+    return 'x402 Protocol'
+  }
+
+  const parts = raw.split('_')
+  return parts.length > 1 ? parts[parts.length - 1] : raw
 }
 
 export const DEFAULT_CLAW402_MODEL = 'deepseek-v4-flash'
