@@ -274,7 +274,9 @@ export function CompetitionPage() {
                             className="text-xs mono font-semibold"
                             style={{ color: traderColor }}
                           >
-                            {trader.ai_model.toUpperCase()} +{' '}
+                            {(trader.ai_model || '').toLowerCase().includes('claw402')
+                              ? 'X402'
+                              : trader.ai_model.toUpperCase()} +{' '}
                             {trader.exchange.toUpperCase()}
                           </div>
                         </div>

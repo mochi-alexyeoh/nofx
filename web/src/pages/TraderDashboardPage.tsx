@@ -451,10 +451,12 @@ export function TraderDashboardPage({
                                     border: `1px solid ${selectedTrader.ai_model.includes('qwen') ? '#c084fc' : '#60a5fa'}40`
                                 }}
                             >
-                                {getModelDisplayName(
-                                    selectedTrader.ai_model.split('_').pop() ||
-                                    selectedTrader.ai_model
-                                )}
+                                {(selectedTrader.ai_model || '').toLowerCase().includes('claw402')
+                                    ? 'x402'
+                                    : getModelDisplayName(
+                                        selectedTrader.ai_model.split('_').pop() ||
+                                        selectedTrader.ai_model
+                                    )}
                             </span>
                         </span>
                         <span className="w-px h-3 bg-white/10 hidden md:block" />

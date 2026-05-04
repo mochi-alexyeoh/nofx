@@ -238,9 +238,11 @@ function TraderRow({
                 : '#c084fc',
             }}
           >
-            {getModelDisplayName(
-              trader.ai_model.split('_').pop() || trader.ai_model
-            )}{' '}
+            {(trader.ai_model || '').toLowerCase().includes('claw402')
+              ? 'x402'
+              : getModelDisplayName(
+                  trader.ai_model.split('_').pop() || trader.ai_model
+                )}{' '}
             Model • {getExchangeDisplayName(trader.exchange_id, allExchanges)}
           </div>
         </div>
