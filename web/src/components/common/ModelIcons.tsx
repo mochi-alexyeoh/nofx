@@ -50,7 +50,7 @@ export const getModelIcon = (modelType: string, props: IconProps = {}) => {
       iconPath = '/icons/minimax.svg'
       break
     case 'claw402':
-      iconPath = '/icons/claw402.png'
+      iconPath = '/icons/x402.png'
       break
     default:
       return null
