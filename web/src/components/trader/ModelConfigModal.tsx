@@ -282,7 +282,7 @@ function ModelSelectionStep({
               <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden">
                 <img
                   src="/icons/claw402.png"
-                  alt="Claw402"
+                  alt="x402"
                   width={40}
                   height={40}
                 />
@@ -292,9 +292,9 @@ function ModelSelectionStep({
                   className="font-bold text-base"
                   style={{ color: '#EAECEF' }}
                 >
-                  Claw402
+                  x402
                   <a
-                    href="https://claw402.ai"
+                    href="https://x402.org"
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
@@ -304,7 +304,7 @@ function ModelSelectionStep({
                       background: 'rgba(96, 165, 250, 0.1)',
                     }}
                   >
-                    ↗ claw402.ai
+                    ↗ x402.org
                   </a>
                 </div>
                 <div className="text-xs mt-0.5" style={{ color: '#A0AEC0' }}>
@@ -621,16 +621,16 @@ function Claw402ConfigForm({
         }}
       >
         <div className="w-14 h-14 mx-auto rounded-2xl flex items-center justify-center mb-3 overflow-hidden">
-          <img src="/icons/claw402.png" alt="Claw402" width={56} height={56} />
+          <img src="/icons/claw402.png" alt="x402" width={56} height={56} />
         </div>
         <a
-          href="https://claw402.ai"
+          href="https://x402.org"
           target="_blank"
           rel="noopener noreferrer"
           className="text-lg font-bold inline-flex items-center gap-1.5 hover:underline"
           style={{ color: '#EAECEF' }}
         >
-          Claw402{' '}
+          x402{' '}
           <span className="text-xs font-normal" style={{ color: '#60A5FA' }}>
             ↗
           </span>

@@ -139,8 +139,8 @@ export const AI_PROVIDER_CONFIG: Record<string, AIProviderConfig> = {
   },
   claw402: {
     defaultModel: DEFAULT_CLAW402_MODEL,
-    apiUrl: 'https://claw402.ai',
-    apiName: 'Claw402',
+    apiUrl: 'https://x402.org',
+    apiName: 'x402',
   },
 }
 
