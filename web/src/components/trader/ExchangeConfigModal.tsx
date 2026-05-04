@@ -618,30 +618,47 @@ export function ExchangeConfigModal({
                   )}
 
                   {currentExchangeType === 'binance' && (
-                    <div className="p-4 rounded-xl" style={{ background: 'rgba(240, 185, 11, 0.1)', border: '1px solid rgba(240, 185, 11, 0.2)' }}>
-                      <div className="text-sm font-semibold mb-2" style={{ color: '#F0B90B' }}>
-                        {t('whitelistIP', language)}
+                    <>
+                      <div className="p-4 rounded-xl" style={{ background: 'rgba(240, 185, 11, 0.08)', border: '1px solid rgba(240, 185, 11, 0.2)' }}>
+                        <label className="flex items-start justify-between gap-3 cursor-pointer">
+                          <div>
+                            <div className="text-sm font-semibold" style={{ color: '#EAECEF' }}>Use Testnet</div>
+                            <div className="text-xs mt-1" style={{ color: '#848E9C' }}>{t('testnetDescription', language)}</div>
+                          </div>
+                          <input
+                            type="checkbox"
+                            checked={testnet}
+                            onChange={(e) => setTestnet(e.target.checked)}
+                            className="mt-1 h-4 w-4"
+                          />
+                        </label>
                       </div>
-                      <div className="text-xs mb-3" style={{ color: '#848E9C' }}>
-                        {t('whitelistIPDesc', language)}
-                      </div>
-                      {loadingIP ? (
-                        <div className="text-xs" style={{ color: '#848E9C' }}>{t('loadingServerIP', language)}</div>
-                      ) : serverIP?.public_ip ? (
-                        <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: '#0B0E11' }}>
-                          <code className="flex-1 text-sm font-mono" style={{ color: '#F0B90B' }}>{serverIP.public_ip}</code>
-                          <button
-                            type="button"
-                            onClick={() => handleCopyIP(serverIP.public_ip)}
-                            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:scale-105"
-                            style={{ background: 'rgba(240, 185, 11, 0.2)', color: '#F0B90B' }}
-                          >
-                            <Copy className="w-3 h-3" />
-                            {copiedIP ? t('ipCopied', language) : t('copyIP', language)}
-                          </button>
+
+                      <div className="p-4 rounded-xl" style={{ background: 'rgba(240, 185, 11, 0.1)', border: '1px solid rgba(240, 185, 11, 0.2)' }}>
+                        <div className="text-sm font-semibold mb-2" style={{ color: '#F0B90B' }}>
+                          {t('whitelistIP', language)}
                         </div>
-                      ) : null}
-                    </div>
+                        <div className="text-xs mb-3" style={{ color: '#848E9C' }}>
+                          {t('whitelistIPDesc', language)}
+                        </div>
+                        {loadingIP ? (
+                          <div className="text-xs" style={{ color: '#848E9C' }}>{t('loadingServerIP', language)}</div>
+                        ) : serverIP?.public_ip ? (
+                          <div className="flex items-center gap-2 p-3 rounded-lg" style={{ background: '#0B0E11' }}>
+                            <code className="flex-1 text-sm font-mono" style={{ color: '#F0B90B' }}>{serverIP.public_ip}</code>
+                            <button
+                              type="button"
+                              onClick={() => handleCopyIP(serverIP.public_ip)}
+                              className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:scale-105"
+                              style={{ background: 'rgba(240, 185, 11, 0.2)', color: '#F0B90B' }}
+                            >
+                              <Copy className="w-3 h-3" />
+                              {copiedIP ? t('ipCopied', language) : t('copyIP', language)}
+                            </button>
+                          </div>
+                        ) : null}
+                      </div>
+                    </>
                   )}
                 </>
               )}
