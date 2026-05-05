@@ -80,6 +80,8 @@ export const gridConfig = {
   maxDrawdownDesc: { zh: '触发紧急退出的最大回撤百分比', en: 'Max drawdown before emergency exit', es: 'Drawdown máximo' },
   stopLoss: { zh: '止损 (%)', en: 'Stop Loss (%)', es: 'Stop Loss (%)' },
   stopLossDesc: { zh: '单仓位止损百分比', en: 'Stop loss per position', es: 'Stop loss por posición' },
+  takeProfit: { zh: '止盈 (%)', en: 'Take Profit (%)', es: 'Take Profit (%)' },
+  takeProfitDesc: { zh: '单仓位止盈百分比（达到即平仓）', en: 'Take profit per position (close when reached)', es: 'Take profit por posición (cerrar al alcanzar)' },
   dailyLossLimit: { zh: '日损失限制 (%)', en: 'Daily Loss Limit (%)', es: 'Límite Diario (%)' },
   dailyLossLimitDesc: { zh: '每日最大亏损百分比', en: 'Maximum daily loss percentage', es: 'Pérdida diaria máxima' },
   useMakerOnly: { zh: '仅使用 Maker 订单', en: 'Maker Only Orders', es: 'Solo Maker' },

@@ -129,6 +129,8 @@ type GridStrategyConfig struct {
 	MaxDrawdownPct float64 `json:"max_drawdown_pct"`
 	// Stop loss percentage per position
 	StopLossPct float64 `json:"stop_loss_pct"`
+	// Take profit percentage per position
+	TakeProfitPct float64 `json:"take_profit_pct"`
 	// Daily loss limit percentage
 	DailyLossLimitPct float64 `json:"daily_loss_limit_pct"`
 	// Use maker-only orders for lower fees

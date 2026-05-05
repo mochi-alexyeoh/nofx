@@ -116,6 +116,7 @@ func buildGridSystemPromptZh(config *store.GridStrategyConfig) string {
 - 总投资: %.2f USDT
 - 杠杆: %dx
 - 价格分布: %s
+- 止盈阈值: %.2f%%
 
 ## 决策规则
 
@@ -129,10 +130,18 @@ func buildGridSystemPromptZh(config *store.GridStrategyConfig) string {
 - place_sell_limit: 在指定价格下卖出限价单
 - cancel_order: 取消指定订单
 - cancel_all_orders: 取消所有订单
+- close_long: 平掉多头仓位（达到止盈或趋势反转时）
+- close_short: 平掉空头仓位（达到止盈或趋势反转时）
 - pause_grid: 暂停网格交易（趋势市场时）
 - resume_grid: 恢复网格交易（震荡市场时）
 - adjust_grid: 调整网格边界
 - hold: 保持当前状态不操作
+
+### 平仓规则（必须遵守）
+- 当已成交网格层的多头浮盈 >= 止盈阈值（Take Profit Threshold）时，优先输出 close_long
+- 当已成交网格层的空头浮盈 >= 止盈阈值（Take Profit Threshold）时，优先输出 close_short
+- 出现明显反转信号且置信度高时，优先平掉反向仓位，再考虑新开仓
+- 在边界突破附近，优先降低风险（平仓或减仓）而不是继续加仓
 
 ## 输出格式
 输出JSON数组，每个决策包含:
@@ -144,13 +153,14 @@ func buildGridSystemPromptZh(config *store.GridStrategyConfig) string {
 - order_id: 订单ID（取消订单用）
 - confidence: 置信度 0-100
 - reasoning: 决策理由
+- 平仓动作（close_long/close_short）必须提供 quantity，建议带上 level_index
 
 示例:
 [
   {"symbol": "BTCUSDT", "action": "place_buy_limit", "price": 94000, "quantity": 0.01, "level_index": 2, "confidence": 85, "reasoning": "第2层价格接近，下买单"},
   {"symbol": "BTCUSDT", "action": "hold", "confidence": 90, "reasoning": "市场震荡，保持当前网格"}
 ]
-`, config.Symbol, config.Symbol, config.GridCount, config.TotalInvestment, config.Leverage, config.Distribution)
+`, config.Symbol, config.Symbol, config.GridCount, config.TotalInvestment, config.Leverage, config.Distribution, config.TakeProfitPct)
 }
 
 func buildGridSystemPromptEn(config *store.GridStrategyConfig) string {
@@ -168,6 +178,7 @@ You are an experienced grid trading expert managing a grid strategy for %s. Your
 - Total Investment: %.2f USDT
 - Leverage: %dx
 - Distribution: %s
+- Take Profit Threshold: %.2f%%
 
 ## Decision Rules
 
@@ -181,10 +192,18 @@ You are an experienced grid trading expert managing a grid strategy for %s. Your
 - place_sell_limit: Place sell limit order at specified price
 - cancel_order: Cancel specific order
 - cancel_all_orders: Cancel all orders
+- close_long: Close long position (when TP is reached or trend reverses)
+- close_short: Close short position (when TP is reached or trend reverses)
 - pause_grid: Pause grid trading (in trending market)
 - resume_grid: Resume grid trading (in ranging market)
 - adjust_grid: Adjust grid boundaries
 - hold: Maintain current state
+
+### Closing Rules (must follow)
+- If a filled long level unrealized profit >= Take Profit Threshold, prioritize close_long
+- If a filled short level unrealized profit >= Take Profit Threshold, prioritize close_short
+- If strong reversal signals appear with high confidence, close opposite exposure first before opening new orders
+- Near boundary breakout zones, prioritize risk reduction (close/reduce) over adding exposure
 
 ## Output Format
 Output JSON array, each decision contains:
@@ -196,13 +215,14 @@ Output JSON array, each decision contains:
 - order_id: Order ID (for cancel)
 - confidence: Confidence 0-100
 - reasoning: Decision reason
+- close_long/close_short must include quantity (level_index recommended)
 
 Example:
 [
   {"symbol": "BTCUSDT", "action": "place_buy_limit", "price": 94000, "quantity": 0.01, "level_index": 2, "confidence": 85, "reasoning": "Level 2 price approaching, place buy order"},
   {"symbol": "BTCUSDT", "action": "hold", "confidence": 90, "reasoning": "Market ranging, maintain current grid"}
 ]
-`, config.Symbol, config.Symbol, config.GridCount, config.TotalInvestment, config.Leverage, config.Distribution)
+`, config.Symbol, config.Symbol, config.GridCount, config.TotalInvestment, config.Leverage, config.Distribution, config.TakeProfitPct)
 }
 
 // BuildGridUserPrompt builds the user prompt with current grid context

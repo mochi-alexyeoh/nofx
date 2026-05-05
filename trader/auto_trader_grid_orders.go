@@ -316,6 +316,9 @@ func (at *AutoTrader) syncGridState() {
 	// Check stop loss
 	at.checkAndExecuteStopLoss()
 
+	// Deterministic take-profit safety net (independent of AI close decisions)
+	at.checkAndExecuteTakeProfit()
+
 	// Check grid skew
 	at.autoAdjustGrid()
 }
@@ -414,6 +417,68 @@ func (at *AutoTrader) checkAndExecuteStopLoss() {
 				logger.Infof("[Grid] Stop loss executed: Level %d closed at $%.2f (loss %.2f%%)",
 					i, currentPrice, lossPct)
 			}
+		}
+	}
+}
+
+// checkAndExecuteTakeProfit checks if any filled level has reached take profit and closes it.
+func (at *AutoTrader) checkAndExecuteTakeProfit() {
+	gridConfig := at.config.StrategyConfig.GridConfig
+	if gridConfig.TakeProfitPct <= 0 {
+		return // Take profit not configured
+	}
+
+	currentPrice, err := at.trader.GetMarketPrice(gridConfig.Symbol)
+	if err != nil {
+		logger.Warnf("[Grid] Failed to get market price for take profit check: %v", err)
+		return
+	}
+
+	at.gridState.mu.Lock()
+	defer at.gridState.mu.Unlock()
+
+	for i := range at.gridState.Levels {
+		level := &at.gridState.Levels[i]
+		if level.State != "filled" || level.PositionEntry <= 0 || level.PositionSize <= 0 {
+			continue
+		}
+
+		var profitPct float64
+		if level.Side == "buy" {
+			profitPct = (currentPrice - level.PositionEntry) / level.PositionEntry * 100
+		} else {
+			profitPct = (level.PositionEntry - currentPrice) / level.PositionEntry * 100
+		}
+
+		if profitPct >= gridConfig.TakeProfitPct {
+			logger.Infof("[Grid] TAKE PROFIT TRIGGERED: Level %d, entry=$%.2f, current=$%.2f, profit=%.2f%%",
+				i, level.PositionEntry, currentPrice, profitPct)
+
+			var closeErr error
+			if level.Side == "buy" {
+				_, closeErr = at.trader.CloseLong(gridConfig.Symbol, level.PositionSize)
+			} else {
+				_, closeErr = at.trader.CloseShort(gridConfig.Symbol, level.PositionSize)
+			}
+
+			if closeErr != nil {
+				logger.Errorf("[Grid] Failed to execute take profit for level %d: %v", i, closeErr)
+				continue
+			}
+
+			realizedProfit := profitPct * level.AllocatedUSD / 100
+			level.State = "empty"
+			level.PositionEntry = 0
+			level.PositionSize = 0
+			level.UnrealizedPnL = 0
+			level.OrderID = ""
+			level.OrderQuantity = 0
+			at.gridState.TotalTrades++
+			at.gridState.WinningTrades++
+			at.gridState.DailyPnL += realizedProfit
+			at.gridState.TotalProfit += realizedProfit
+			logger.Infof("[Grid] Take profit executed: Level %d closed at $%.2f (profit %.2f%%)",
+				i, currentPrice, profitPct)
 		}
 	}
 }

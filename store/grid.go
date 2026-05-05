@@ -31,6 +31,7 @@ type GridConfigModel struct {
 
 	MaxDrawdownPct     float64 `json:"max_drawdown_pct" gorm:"default:15.0"`
 	StopLossPct        float64 `json:"stop_loss_pct" gorm:"default:5.0"`
+	TakeProfitPct      float64 `json:"take_profit_pct" gorm:"default:1.2"`
 	DailyLossLimitPct  float64 `json:"daily_loss_limit_pct" gorm:"default:10"`
 	MaxPositionSizePct float64 `json:"max_position_size_pct" gorm:"default:30"`
 

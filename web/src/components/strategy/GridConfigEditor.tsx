@@ -23,6 +23,7 @@ export const defaultGridConfig: GridStrategyConfig = {
   distribution: 'gaussian',
   max_drawdown_pct: 15,
   stop_loss_pct: 5,
+  take_profit_pct: 1.2,
   daily_loss_limit_pct: 10,
   use_maker_only: true,
   enable_direction_adjust: false,
@@ -292,7 +293,7 @@ export function GridConfigEditor({
           </h3>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <div className="p-4 rounded-lg" style={sectionStyle}>
             <label className="block text-sm mb-1" style={{ color: '#EAECEF' }}>
               {ts(gridConfig.maxDrawdown, language)}
@@ -326,6 +327,26 @@ export function GridConfigEditor({
               disabled={disabled}
               min={1}
               max={20}
+              className="w-full px-3 py-2 rounded"
+              style={inputStyle}
+            />
+          </div>
+
+          <div className="p-4 rounded-lg" style={sectionStyle}>
+            <label className="block text-sm mb-1" style={{ color: '#EAECEF' }}>
+              {ts(gridConfig.takeProfit, language)}
+            </label>
+            <p className="text-xs mb-2" style={{ color: '#848E9C' }}>
+              {ts(gridConfig.takeProfitDesc, language)}
+            </p>
+            <input
+              type="number"
+              value={config.take_profit_pct}
+              onChange={(e) => updateField('take_profit_pct', parseFloat(e.target.value) || 1.2)}
+              disabled={disabled}
+              min={0.1}
+              max={20}
+              step={0.1}
               className="w-full px-3 py-2 rounded"
               style={inputStyle}
             />
