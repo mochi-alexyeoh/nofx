@@ -398,15 +398,23 @@ func (at *AutoTrader) checkAndExecuteStopLoss() {
 
 			// Close the position
 			var closeErr error
+			var order map[string]interface{}
 			if level.Side == "buy" {
-				_, closeErr = at.trader.CloseLong(gridConfig.Symbol, level.PositionSize)
+				order, closeErr = at.trader.CloseLong(gridConfig.Symbol, level.PositionSize)
 			} else {
-				_, closeErr = at.trader.CloseShort(gridConfig.Symbol, level.PositionSize)
+				order, closeErr = at.trader.CloseShort(gridConfig.Symbol, level.PositionSize)
 			}
 
 			if closeErr != nil {
 				logger.Errorf("[Grid] Failed to execute stop loss for level %d: %v", i, closeErr)
 			} else {
+				if order != nil {
+					action := "close_long"
+					if level.Side != "buy" {
+						action = "close_short"
+					}
+					at.recordAndConfirmOrder(order, gridConfig.Symbol, action, level.PositionSize, currentPrice, 0, level.PositionEntry)
+				}
 				level.State = "stopped"
 				realizedLoss := -lossPct * level.AllocatedUSD / 100
 				level.UnrealizedPnL = realizedLoss
@@ -455,10 +463,11 @@ func (at *AutoTrader) checkAndExecuteTakeProfit() {
 				i, level.PositionEntry, currentPrice, profitPct)
 
 			var closeErr error
+			var order map[string]interface{}
 			if level.Side == "buy" {
-				_, closeErr = at.trader.CloseLong(gridConfig.Symbol, level.PositionSize)
+				order, closeErr = at.trader.CloseLong(gridConfig.Symbol, level.PositionSize)
 			} else {
-				_, closeErr = at.trader.CloseShort(gridConfig.Symbol, level.PositionSize)
+				order, closeErr = at.trader.CloseShort(gridConfig.Symbol, level.PositionSize)
 			}
 
 			if closeErr != nil {
@@ -467,6 +476,13 @@ func (at *AutoTrader) checkAndExecuteTakeProfit() {
 			}
 
 			realizedProfit := profitPct * level.AllocatedUSD / 100
+			if order != nil {
+				action := "close_long"
+				if level.Side != "buy" {
+					action = "close_short"
+				}
+				at.recordAndConfirmOrder(order, gridConfig.Symbol, action, level.PositionSize, currentPrice, 0, level.PositionEntry)
+			}
 			level.State = "empty"
 			level.PositionEntry = 0
 			level.PositionSize = 0
