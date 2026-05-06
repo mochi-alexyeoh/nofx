@@ -713,8 +713,8 @@ func (tm *TraderManager) addTraderFromStore(traderCfg *store.Trader, aiModelCfg 
 
 	traderConfig.Claw402WalletKey = resolveTraderDataWalletKey(st, traderCfg.UserID, aiModelCfg)
 
-	// Create trader instance
-	at, err := trader.NewAutoTrader(traderConfig, st, traderCfg.UserID)
+	// Create trader instance (guard against upstream SDK panic, e.g. Hyperliquid meta panic)
+	at, err := newAutoTraderSafe(traderConfig, st, traderCfg.UserID)
 	if err != nil {
 		return fmt.Errorf("failed to create trader: %w", err)
 	}
@@ -749,6 +749,15 @@ func (tm *TraderManager) addTraderFromStore(traderCfg *store.Trader, aiModelCfg 
 	}
 
 	return nil
+}
+
+func newAutoTraderSafe(cfg trader.AutoTraderConfig, st *store.Store, userID string) (at *trader.AutoTrader, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("panic during trader creation: %v", r)
+		}
+	}()
+	return trader.NewAutoTrader(cfg, st, userID)
 }
 
 func resolveTraderDataWalletKey(st *store.Store, userID string, selectedModel *store.AIModel) string {
