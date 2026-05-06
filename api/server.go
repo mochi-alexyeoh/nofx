@@ -141,6 +141,9 @@ func (s *Server) setupRoutes() {
 			s.routeWithSchema(protected, "GET", "/invite-codes", "List invite codes (admin)",
 				`Query: ?limit=<int, default 200, max 500>`,
 				s.handleListInviteCodes)
+			s.routeWithSchema(protected, "POST", "/invite-codes/redeem", "Redeem invite code to activate/extend account entitlement",
+				`Body: {"invite_code":"<string>"}`,
+				s.handleRedeemInviteCode)
 
 			// Server IP query (requires authentication, for whitelist configuration)
 			s.route(protected, "GET", "/server-ip", "Get server public IP (for exchange whitelist)", s.handleGetServerIP)

@@ -28,6 +28,23 @@ func (at *AutoTrader) runCycle() error {
 		return nil
 	}
 
+	// Entitlement gate: stop trading cycles when account trial/entitlement expires.
+	if at.store != nil {
+		active, expiresAt, err := at.store.User().IsEntitlementActive(at.userID, time.Now().UTC())
+		if err != nil {
+			at.logWarnf("⚠️ Failed to check entitlement: %v", err)
+		} else if !active {
+			exp := ""
+			if expiresAt != nil {
+				exp = expiresAt.UTC().Format(time.RFC3339)
+			}
+			at.logWarnf("⛔ Entitlement expired (%s). Stopping trader cycles.", exp)
+			at.Stop()
+			_ = at.store.Trader().UpdateStatus(at.userID, at.id, false)
+			return nil
+		}
+	}
+
 	// Check USDC balance periodically for claw402 users (every 10 cycles)
 	if at.callCount%10 == 0 && store.IsClaw402Config(at.config.AIModel) {
 		at.checkClaw402Balance()

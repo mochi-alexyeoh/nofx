@@ -14,12 +14,13 @@ type UserStore struct {
 
 // User user model
 type User struct {
-	ID           string    `gorm:"primaryKey" json:"id"`
-	Email        string    `gorm:"uniqueIndex:idx_users_email;not null" json:"email"`
-	PasswordHash string    `gorm:"column:password_hash;not null" json:"-"`
-	Role         string    `gorm:"column:role;size:20;default:user" json:"role"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID                   string     `gorm:"primaryKey" json:"id"`
+	Email                string     `gorm:"uniqueIndex:idx_users_email;not null" json:"email"`
+	PasswordHash         string     `gorm:"column:password_hash;not null" json:"-"`
+	Role                 string     `gorm:"column:role;size:20;default:user" json:"role"`
+	EntitlementExpiresAt *time.Time `gorm:"column:entitlement_expires_at" json:"entitlement_expires_at,omitempty"`
+	CreatedAt            time.Time  `json:"created_at"`
+	UpdatedAt            time.Time  `json:"updated_at"`
 }
 
 func (User) TableName() string { return "users" }
@@ -41,6 +42,7 @@ func (s *UserStore) initTables() error {
 			s.db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT NOT NULL DEFAULT ''`)
 			s.db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT NOT NULL DEFAULT ''`)
 			s.db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'user'`)
+			s.db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS entitlement_expires_at TIMESTAMP NULL`)
 			s.db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`)
 			s.db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`)
 
@@ -122,6 +124,44 @@ func (s *UserStore) UpdatePassword(userID, passwordHash string) error {
 		"password_hash": passwordHash,
 		"updated_at":    time.Now().UTC(),
 	}).Error
+}
+
+func (s *UserStore) ExtendEntitlement(userID string, durationDays int) (*time.Time, error) {
+	if durationDays <= 0 {
+		return nil, nil
+	}
+	var user User
+	if err := s.db.Where("id = ?", userID).First(&user).Error; err != nil {
+		return nil, err
+	}
+	now := time.Now().UTC()
+	start := now
+	if user.EntitlementExpiresAt != nil && user.EntitlementExpiresAt.After(now) {
+		start = *user.EntitlementExpiresAt
+	}
+	expires := start.Add(time.Duration(durationDays) * 24 * time.Hour)
+	if err := s.db.Model(&User{}).Where("id = ?", userID).Updates(map[string]interface{}{
+		"entitlement_expires_at": expires,
+		"updated_at":             now,
+	}).Error; err != nil {
+		return nil, err
+	}
+	return &expires, nil
+}
+
+func (s *UserStore) IsEntitlementActive(userID string, now time.Time) (bool, *time.Time, error) {
+	var u User
+	if err := s.db.Select("id", "entitlement_expires_at").Where("id = ?", userID).First(&u).Error; err != nil {
+		return false, nil, err
+	}
+	if u.EntitlementExpiresAt == nil {
+		// Legacy / unlimited account
+		return true, nil, nil
+	}
+	if u.EntitlementExpiresAt.After(now) {
+		return true, u.EntitlementExpiresAt, nil
+	}
+	return false, u.EntitlementExpiresAt, nil
 }
 
 // DeleteAll deletes all users (reset system to uninitialized state)
