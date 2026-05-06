@@ -270,23 +270,4 @@ export const configApi = {
     return result.data
   },
 
-  async cleanupTraderOrderDuplicates(backup = true): Promise<{
-    message: string
-    duplicates_before: number
-    duplicates_after: number
-    rows_deleted: number
-    backup_table?: string
-  }> {
-    const result = await httpClient.post<{
-      message: string
-      duplicates_before: number
-      duplicates_after: number
-      rows_deleted: number
-      backup_table?: string
-    }>(`${API_BASE}/admin/cleanup-trader-order-duplicates`, { backup })
-    if (!result.success || !result.data) {
-      throw new Error(result.message || 'Failed to cleanup duplicates')
-    }
-    return result.data
-  },
 }

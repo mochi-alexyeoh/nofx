@@ -147,10 +147,6 @@ func (s *Server) setupRoutes() {
 			s.routeWithSchema(protected, "GET", "/invite-codes/my-status", "Get current user entitlement status + latest redeemed code",
 				`Returns: {active, entitlement_expires_at, latest_redeemed_code, latest_redeemed_used_at, latest_redeemed_days}`,
 				s.handleMyEntitlementStatus)
-			// TEMP maintenance endpoint: remove duplicate trader_orders.exchange_order_id rows
-			s.routeWithSchema(protected, "POST", "/admin/cleanup-trader-order-duplicates", "(TEMP) Cleanup duplicate trader_orders.exchange_order_id records (admin only)",
-				`Body: {"backup": true|false} default true`,
-				s.handleCleanupTraderOrderDuplicates)
 
 			// Server IP query (requires authentication, for whitelist configuration)
 			s.route(protected, "GET", "/server-ip", "Get server public IP (for exchange whitelist)", s.handleGetServerIP)

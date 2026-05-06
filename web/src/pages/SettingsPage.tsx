@@ -67,7 +67,6 @@ export function SettingsPage() {
   const [generatedCodes, setGeneratedCodes] = useState<string[]>([])
   const [loadingInvites, setLoadingInvites] = useState(false)
   const [generatingInvites, setGeneratingInvites] = useState(false)
-  const [cleaningDuplicates, setCleaningDuplicates] = useState(false)
   const [redeemCode, setRedeemCode] = useState('')
   const [redeemingCode, setRedeemingCode] = useState(false)
   const [entitlementInfo, setEntitlementInfo] = useState<{
@@ -368,23 +367,6 @@ export function SettingsPage() {
     }
   }
 
-  const handleCleanupDuplicates = async () => {
-    const confirmed = window.confirm(
-      'Run one-time cleanup for duplicate trader order records? A backup table will be created first.'
-    )
-    if (!confirmed) return
-    setCleaningDuplicates(true)
-    try {
-      const res = await api.cleanupTraderOrderDuplicates(true)
-      toast.success(
-        `Cleanup done. deleted=${res.rows_deleted}, before=${res.duplicates_before}, after=${res.duplicates_after}`
-      )
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to cleanup duplicates')
-    } finally {
-      setCleaningDuplicates(false)
-    }
-  }
 
   const handleRedeemCode = async () => {
     const code = redeemCode.trim()
@@ -736,18 +718,6 @@ export function SettingsPage() {
                   />
                 )}
 
-                <div className="pt-2 border-t border-zinc-800/80">
-                  <button
-                    onClick={handleCleanupDuplicates}
-                    disabled={cleaningDuplicates}
-                    className="bg-red-900/50 hover:bg-red-800/60 text-red-200 font-semibold px-4 py-2 rounded-xl text-sm disabled:opacity-60"
-                  >
-                    {cleaningDuplicates ? 'Cleaning...' : 'TEMP: Cleanup Duplicate Order Records'}
-                  </button>
-                  <p className="text-[11px] text-zinc-500 mt-2">
-                    Temporary maintenance action to fix duplicate exchange_order_id rows.
-                  </p>
-                </div>
               </div>
 
               <div className="rounded-xl border border-zinc-700/70 bg-zinc-900/50 p-4 space-y-4">
