@@ -467,6 +467,105 @@ func (s *Server) handleMyEntitlementStatus(c *gin.Context) {
 	})
 }
 
+// handleCleanupTraderOrderDuplicates TEMP maintenance endpoint.
+// Removes duplicate rows by exchange_order_id while keeping the smallest id row.
+func (s *Server) handleCleanupTraderOrderDuplicates(c *gin.Context) {
+	userID := c.GetString("user_id")
+	if !s.isAdminUser(userID) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Admin only"})
+		return
+	}
+
+	var req struct {
+		Backup bool `json:"backup"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		// Allow empty body
+		req.Backup = true
+	}
+	if !req.Backup {
+		// keep as requested
+	} else {
+		req.Backup = true
+	}
+
+	db := s.store.GormDB()
+	var before int64
+	if err := db.Raw(`
+		SELECT COUNT(*) FROM (
+			SELECT exchange_order_id
+			FROM trader_orders
+			WHERE exchange_order_id IS NOT NULL AND exchange_order_id <> ''
+			GROUP BY exchange_order_id
+			HAVING COUNT(*) > 1
+		) t
+	`).Scan(&before).Error; err != nil {
+		SafeInternalError(c, "Failed to count duplicates", err)
+		return
+	}
+
+	backupTable := ""
+	if req.Backup {
+		backupTable = fmt.Sprintf("trader_orders_backup_%s", time.Now().UTC().Format("20060102_150405"))
+		createSQL := fmt.Sprintf(`
+			CREATE TABLE IF NOT EXISTS %s AS
+			SELECT * FROM trader_orders
+			WHERE exchange_order_id IN (
+				SELECT exchange_order_id
+				FROM trader_orders
+				WHERE exchange_order_id IS NOT NULL AND exchange_order_id <> ''
+				GROUP BY exchange_order_id
+				HAVING COUNT(*) > 1
+			)
+		`, backupTable)
+		if err := db.Exec(createSQL).Error; err != nil {
+			SafeInternalError(c, "Failed to create backup table", err)
+			return
+		}
+	}
+
+	res := db.Exec(`
+		DELETE FROM trader_orders
+		WHERE id IN (
+			SELECT t1.id
+			FROM trader_orders t1
+			JOIN trader_orders t2
+				ON t1.exchange_order_id = t2.exchange_order_id
+			 AND t1.id > t2.id
+			WHERE t1.exchange_order_id IS NOT NULL
+			  AND t1.exchange_order_id <> ''
+		)
+	`)
+	if res.Error != nil {
+		SafeInternalError(c, "Failed to delete duplicate rows", res.Error)
+		return
+	}
+	deleted := res.RowsAffected
+
+	var after int64
+	if err := db.Raw(`
+		SELECT COUNT(*) FROM (
+			SELECT exchange_order_id
+			FROM trader_orders
+			WHERE exchange_order_id IS NOT NULL AND exchange_order_id <> ''
+			GROUP BY exchange_order_id
+			HAVING COUNT(*) > 1
+		) t
+	`).Scan(&after).Error; err != nil {
+		SafeInternalError(c, "Failed to verify duplicates", err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":            "Cleanup completed",
+		"duplicates_before":  before,
+		"duplicates_after":   after,
+		"rows_deleted":       deleted,
+		"backup_table":       backupTable,
+		"backup_enabled":     req.Backup,
+	})
+}
+
 func generateInviteCode() (string, error) {
 	buf := make([]byte, 8)
 	if _, err := rand.Read(buf); err != nil {
