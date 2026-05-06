@@ -460,6 +460,25 @@ export function SettingsPage() {
                   </button>
                 </form>
               </div>
+
+              <div className="border-t border-zinc-800 pt-6 space-y-3">
+                <h3 className="text-sm font-semibold text-white">Redeem Activation Code</h3>
+                <div className="flex items-center gap-2">
+                  <input
+                    value={redeemCode}
+                    onChange={(e) => setRedeemCode(e.target.value.toUpperCase())}
+                    placeholder="ABCD1-EFGH-IJKL"
+                    className="flex-1 bg-zinc-950/80 border border-zinc-700/80 rounded-xl px-3 py-2 text-sm text-white"
+                  />
+                  <button
+                    onClick={handleRedeemCode}
+                    disabled={redeemingCode}
+                    className="bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-semibold px-4 py-2 rounded-xl text-sm disabled:opacity-60"
+                  >
+                    {redeemingCode ? 'Redeeming...' : 'Redeem'}
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
@@ -672,25 +691,6 @@ export function SettingsPage() {
               </div>
 
               <div className="rounded-xl border border-zinc-700/70 bg-zinc-900/50 p-4 space-y-4">
-                <div>
-                  <h3 className="text-sm font-semibold text-white mb-2">Redeem Activation Code</h3>
-                  <div className="flex items-center gap-2">
-                    <input
-                      value={redeemCode}
-                      onChange={(e) => setRedeemCode(e.target.value.toUpperCase())}
-                      placeholder="ABCD1-EFGH-IJKL"
-                      className="flex-1 bg-zinc-950/80 border border-zinc-700/80 rounded-xl px-3 py-2 text-sm text-white"
-                    />
-                    <button
-                      onClick={handleRedeemCode}
-                      disabled={redeemingCode}
-                      className="bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-semibold px-4 py-2 rounded-xl text-sm disabled:opacity-60"
-                    >
-                      {redeemingCode ? 'Redeeming...' : 'Redeem'}
-                    </button>
-                  </div>
-                </div>
-
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-semibold text-white">Invite Code History</h3>
                   <button
