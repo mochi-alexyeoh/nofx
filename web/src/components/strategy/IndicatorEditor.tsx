@@ -1,10 +1,8 @@
-import { Clock, Activity, TrendingUp, BarChart2, Info, Lock, ExternalLink, Zap, Check, AlertCircle, Key } from 'lucide-react'
+import { Clock, Activity, TrendingUp, BarChart2, Info, Lock, Zap, Check, AlertCircle } from 'lucide-react'
 import type { IndicatorConfig } from '../../types'
 import { indicator, ts } from '../../i18n/strategy-translations'
 import { NofxSelect } from '../ui/select'
 
-// Default NofxOS API Key
-const DEFAULT_NOFXOS_API_KEY = 'cm_568c67eae410d912c54c'
 
 interface IndicatorEditorProps {
   config: IndicatorConfig
@@ -124,7 +122,7 @@ export function IndicatorEditor({
       {/* NofxOS Data Provider - Top Configuration    */}
       {/* ============================================ */}
       <div
-        className="hidden rounded-lg overflow-hidden relative"
+        className="rounded-lg overflow-hidden relative"
         style={{
           background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.08) 50%, rgba(236, 72, 153, 0.08) 100%)',
           border: '1px solid rgba(139, 92, 246, 0.3)',
@@ -148,15 +146,15 @@ export function IndicatorEditor({
               </div>
               <div>
                 <h3 className="text-sm font-semibold" style={{ color: '#EAECEF' }}>
-                  {ts(indicator.nofxosTitle, language)}
+                  AI Data Provider
                 </h3>
                 <span className="text-[10px]" style={{ color: '#848E9C' }}>
-                  {ts(indicator.nofxosFeatures, language)}
+                  TOP500 · OI Ranking · Fund Flow · Price Ranking
                 </span>
               </div>
             </div>
 
-            {/* Status & API Docs */}
+            {/* Status */}
             <div className="flex items-center gap-2">
               {hasApiKey ? (
                 <span className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-full" style={{ background: 'rgba(14, 203, 129, 0.15)', color: '#0ECB81' }}>
@@ -169,59 +167,14 @@ export function IndicatorEditor({
                   {ts(indicator.notConfigured, language)}
                 </span>
               )}
-              <a
-                href="https://nofxos.ai/api-docs"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-full transition-all hover:scale-[1.02]"
-                style={{
-                  background: 'rgba(139, 92, 246, 0.2)',
-                  color: '#a855f7',
-                }}
-              >
-                <ExternalLink className="w-3 h-3" />
-                {ts(indicator.viewApiDocs, language)}
-              </a>
             </div>
           </div>
 
-          {/* API Key Input */}
-          <div className="flex items-center gap-2">
-            <div className="flex-1 relative">
-              <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#848E9C' }} />
-              <input
-                type="text"
-                value={config.nofxos_api_key || ''}
-                onChange={(e) => !disabled && onChange({ ...config, nofxos_api_key: e.target.value })}
-                disabled={disabled}
-                placeholder={ts(indicator.apiKeyPlaceholder, language)}
-                className="w-full pl-9 pr-3 py-2 rounded-lg text-sm font-mono"
-                style={{
-                  background: 'rgba(30, 35, 41, 0.8)',
-                  border: hasApiKey ? '1px solid rgba(14, 203, 129, 0.3)' : '1px solid rgba(139, 92, 246, 0.3)',
-                  color: '#EAECEF',
-                }}
-              />
-            </div>
-            {!disabled && !config.nofxos_api_key && (
-              <button
-                type="button"
-                onClick={() => onChange({ ...config, nofxos_api_key: DEFAULT_NOFXOS_API_KEY })}
-                className="px-3 py-2 rounded-lg text-xs font-medium transition-all hover:scale-[1.02]"
-                style={{
-                  background: 'linear-gradient(135deg, #6366f1, #a855f7)',
-                  color: '#fff',
-                }}
-              >
-                {ts(indicator.fillDefault, language)}
-              </button>
-            )}
-          </div>
 
           {/* NofxOS Data Sources Grid */}
           <div className="mt-4">
             <div className="text-[10px] font-medium mb-2" style={{ color: '#848E9C' }}>
-              {ts(indicator.nofxosDataSources, language)}
+AI Data Sources
             </div>
             <div className="grid grid-cols-2 gap-2">
               {/* Quant Data */}
