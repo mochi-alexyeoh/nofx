@@ -124,7 +124,7 @@ export function IndicatorEditor({
       {/* NofxOS Data Provider - Top Configuration    */}
       {/* ============================================ */}
       <div
-        className="rounded-lg overflow-hidden relative"
+        className="hidden rounded-lg overflow-hidden relative"
         style={{
           background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.08) 50%, rgba(236, 72, 153, 0.08) 100%)',
           border: '1px solid rgba(139, 92, 246, 0.3)',
