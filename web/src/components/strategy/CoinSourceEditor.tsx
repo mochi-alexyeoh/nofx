@@ -33,7 +33,7 @@ export function CoinSourceEditor({
     let totalLimit = 0
 
     if (config.use_ai500) {
-      sources.push(`AI500(${config.ai500_limit || 3})`)
+      sources.push(`AI(${config.ai500_limit || 3})`)
       totalLimit += config.ai500_limit || 3
     }
     if (config.use_oi_top) {
@@ -154,7 +154,7 @@ export function CoinSourceEditor({
     <span
       className="text-[9px] px-1.5 py-0.5 rounded font-medium bg-purple-500/20 text-purple-400 border border-purple-500/30"
     >
-      NofxOS
+      AI-powered
     </span>
   )
 
@@ -301,7 +301,7 @@ export function CoinSourceEditor({
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-nofx-gold" />
               <span className="text-sm font-medium text-nofx-text">
-                AI500 {ts(coinSource.dataSourceConfig, language)}
+                AI {ts(coinSource.dataSourceConfig, language)}
               </span>
               <NofxOSBadge />
             </div>
@@ -338,10 +338,6 @@ export function CoinSourceEditor({
                 />
               </div>
             )}
-
-            <p className="text-xs pl-8 text-nofx-text-muted">
-              {ts(coinSource.nofxosNote, language)}
-            </p>
           </div>
         </div>
       )}
@@ -392,10 +388,6 @@ export function CoinSourceEditor({
                 />
               </div>
             )}
-
-            <p className="text-xs pl-8 text-nofx-text-muted">
-              {ts(coinSource.nofxosNote, language)}
-            </p>
           </div>
         </div>
       )}
@@ -446,10 +438,6 @@ export function CoinSourceEditor({
                 />
               </div>
             )}
-
-            <p className="text-xs pl-8 text-nofx-text-muted">
-              {ts(coinSource.nofxosNote, language)}
-            </p>
           </div>
         </div>
       )}
@@ -485,7 +473,7 @@ export function CoinSourceEditor({
                   onClick={(e) => e.stopPropagation()}
                 />
                 <Database className="w-4 h-4 text-nofx-gold" />
-                <span className="text-sm font-medium text-nofx-text">AI500</span>
+                <span className="text-sm font-medium text-nofx-text">AI</span>
                 <NofxOSBadge />
               </div>
               {config.use_ai500 && (
