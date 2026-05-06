@@ -132,7 +132,7 @@ func (s *Server) getExchangeAccountStates(userID string) (map[string]ExchangeAcc
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			state := probeExchangeAccountState(exchangeCfg, userID)
+			state := safeProbeExchangeAccountState(exchangeCfg, userID)
 			mu.Lock()
 			states[exchangeCfg.ID] = state
 			mu.Unlock()
@@ -143,6 +143,24 @@ func (s *Server) getExchangeAccountStates(userID string) (map[string]ExchangeAcc
 	s.exchangeAccountStateCache.Set(userID, states)
 
 	return cloneExchangeAccountStates(states), nil
+}
+
+func safeProbeExchangeAccountState(exchangeCfg *store.Exchange, userID string) (state ExchangeAccountState) {
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Errorf("panic while probing exchange account %s (%s): %v", exchangeCfg.ID, exchangeCfg.ExchangeType, r)
+			state = ExchangeAccountState{
+				ExchangeID:    exchangeCfg.ID,
+				CheckedAt:     time.Now().UTC(),
+				Asset:         accountAssetForExchange(exchangeCfg.ExchangeType),
+				Status:        exchangeAccountStatusUnavailable,
+				ErrorCode:     "PROBE_PANIC",
+				ErrorMessage:  "Exchange probe temporarily unavailable",
+				DisplayBalance: "",
+			}
+		}
+	}()
+	return probeExchangeAccountState(exchangeCfg, userID)
 }
 
 func probeExchangeAccountState(exchangeCfg *store.Exchange, userID string) ExchangeAccountState {
