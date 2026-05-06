@@ -154,7 +154,7 @@ export function CoinSourceEditor({
     <span
       className="text-[9px] px-1.5 py-0.5 rounded font-medium bg-purple-500/20 text-purple-400 border border-purple-500/30"
     >
-      NofxOS
+      AI-powered
     </span>
   )
 
