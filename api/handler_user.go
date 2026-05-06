@@ -437,6 +437,36 @@ func (s *Server) handleListInviteCodes(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"items": items})
 }
 
+func (s *Server) handleMyEntitlementStatus(c *gin.Context) {
+	userID := c.GetString("user_id")
+	now := time.Now().UTC()
+	active, expiresAt, err := s.store.User().IsEntitlementActive(userID, now)
+	if err != nil {
+		SafeInternalError(c, "Failed to get entitlement status", err)
+		return
+	}
+	latestCode, err := s.store.InviteCode().GetLatestUsedByUser(userID)
+	if err != nil {
+		SafeInternalError(c, "Failed to get latest invite code", err)
+		return
+	}
+	var code string
+	var usedAt *time.Time
+	var durationDays int
+	if latestCode != nil {
+		code = latestCode.Code
+		usedAt = latestCode.UsedAt
+		durationDays = latestCode.DurationDays
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"active":                  active,
+		"entitlement_expires_at":  expiresAt,
+		"latest_redeemed_code":    code,
+		"latest_redeemed_used_at": usedAt,
+		"latest_redeemed_days":    durationDays,
+	})
+}
+
 func generateInviteCode() (string, error) {
 	buf := make([]byte, 8)
 	if _, err := rand.Read(buf); err != nil {

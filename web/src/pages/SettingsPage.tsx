@@ -69,6 +69,13 @@ export function SettingsPage() {
   const [generatingInvites, setGeneratingInvites] = useState(false)
   const [redeemCode, setRedeemCode] = useState('')
   const [redeemingCode, setRedeemingCode] = useState(false)
+  const [entitlementInfo, setEntitlementInfo] = useState<{
+    active: boolean
+    entitlement_expires_at?: string | null
+    latest_redeemed_code?: string
+    latest_redeemed_used_at?: string | null
+    latest_redeemed_days?: number
+  } | null>(null)
   const isAdmin = user?.role === 'admin'
 
   const refreshModelConfigs = async () => {
@@ -112,6 +119,11 @@ export function SettingsPage() {
     window.addEventListener('agent-config-refresh', handleRefresh)
     return () => window.removeEventListener('agent-config-refresh', handleRefresh)
   }, [])
+
+  useEffect(() => {
+    if (activeTab !== 'account') return
+    api.getMyEntitlementStatus().then(setEntitlementInfo).catch(() => {})
+  }, [activeTab])
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -370,6 +382,7 @@ export function SettingsPage() {
           ? `Account activated until ${result.entitlement_expires_at}`
           : 'Account activated'
       )
+      api.getMyEntitlementStatus().then(setEntitlementInfo).catch(() => {})
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to redeem invite code')
     } finally {
@@ -463,6 +476,21 @@ export function SettingsPage() {
 
               <div className="border-t border-zinc-800 pt-6 space-y-3">
                 <h3 className="text-sm font-semibold text-white">Redeem Activation Code</h3>
+                <div className="text-xs text-zinc-400 space-y-1">
+                  <div>
+                    Status:{' '}
+                    <span className={entitlementInfo?.active ? 'text-emerald-400' : 'text-red-400'}>
+                      {entitlementInfo?.active ? 'Active' : 'Expired'}
+                    </span>
+                  </div>
+                  <div>
+                    Expires: {entitlementInfo?.entitlement_expires_at || 'Unlimited / Not set'}
+                  </div>
+                  <div>
+                    Current Code: {entitlementInfo?.latest_redeemed_code || '-'}
+                    {entitlementInfo?.latest_redeemed_days ? ` (${entitlementInfo.latest_redeemed_days}-day)` : ''}
+                  </div>
+                </div>
                 <div className="flex items-center gap-2">
                   <input
                     value={redeemCode}

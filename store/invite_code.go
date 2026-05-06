@@ -85,3 +85,17 @@ func (s *InviteCodeStore) List(limit int) ([]InviteCode, error) {
 	err := s.db.Order("created_at DESC").Limit(limit).Find(&rows).Error
 	return rows, err
 }
+
+func (s *InviteCodeStore) GetLatestUsedByUser(userID string) (*InviteCode, error) {
+	var row InviteCode
+	err := s.db.Where("used_by = ? AND used_at IS NOT NULL", userID).
+		Order("used_at DESC").
+		First(&row).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &row, nil
+}

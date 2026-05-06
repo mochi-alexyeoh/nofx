@@ -249,4 +249,24 @@ export const configApi = {
     }
     return result.data || {}
   },
+
+  async getMyEntitlementStatus(): Promise<{
+    active: boolean
+    entitlement_expires_at?: string | null
+    latest_redeemed_code?: string
+    latest_redeemed_used_at?: string | null
+    latest_redeemed_days?: number
+  }> {
+    const result = await httpClient.get<{
+      active: boolean
+      entitlement_expires_at?: string | null
+      latest_redeemed_code?: string
+      latest_redeemed_used_at?: string | null
+      latest_redeemed_days?: number
+    }>(`${API_BASE}/invite-codes/my-status`)
+    if (!result.success || !result.data) {
+      throw new Error(result.message || 'Failed to fetch entitlement status')
+    }
+    return result.data
+  },
 }
