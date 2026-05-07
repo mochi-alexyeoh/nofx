@@ -26,7 +26,7 @@ interface HeaderBarProps {
 
 export default function HeaderBar({
   isLoggedIn = false,
-  isHomePage = false,
+  isHomePage: _isHomePage = false,
   currentPage,
   language = 'zh' as Language,
   onLanguageChange,
