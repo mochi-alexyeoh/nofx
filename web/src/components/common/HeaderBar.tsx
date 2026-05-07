@@ -544,24 +544,6 @@ export default function HeaderBar({
                   ))
                 })()}
 
-                {/* Original Page Links */}
-                {isHomePage && (
-                  <div className="pt-6 border-t border-white/5 space-y-4">
-                    {[
-                      { key: 'features', label: t('features', language) },
-                      { key: 'howItWorks', label: t('howItWorks', language) },
-                    ].map((item) => (
-                      <a
-                        key={item.key}
-                        href={`#${item.key === 'features' ? 'features' : 'how-it-works'}`}
-                        className="block text-base font-mono text-zinc-300 hover:text-white"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        {'>'} {item.label}
-                      </a>
-                    ))}
-                  </div>
-                )}
               </div>
 
               {/* Bottom Actions */}
