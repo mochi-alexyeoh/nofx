@@ -81,6 +81,18 @@ export default function HeaderBar({
     }
   }, [])
 
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [mobileMenuOpen])
+
   return (
     <nav className="fixed top-0 w-full z-50 header-bar">
       <div className="flex items-center justify-between h-16 px-4 sm:px-6 max-w-[1920px] mx-auto">
@@ -414,14 +426,20 @@ export default function HeaderBar({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 md:hidden bg-black/90 backdrop-blur-xl"
+            className="fixed inset-0 z-40 md:hidden"
             style={{ top: '64px' }} // Below header
           >
+            <button
+              type="button"
+              aria-label="Close menu"
+              onClick={() => setMobileMenuOpen(false)}
+              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            />
             <motion.div
-              initial={{ y: -20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.1, duration: 0.3 }}
-              className="flex flex-col h-[calc(100vh-64px)] overflow-y-auto px-6 py-8"
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.05, duration: 0.22 }}
+              className="relative z-10 flex flex-col h-[calc(100vh-64px)] w-[86vw] max-w-sm overflow-y-auto px-5 py-6 bg-[#0B0E11] border-r border-zinc-800 shadow-2xl"
             >
               {/* Navigation Links */}
               <div className="flex flex-col gap-6 mb-12">
@@ -517,8 +535,8 @@ export default function HeaderBar({
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ delay: 0.1 + i * 0.05 }}
                       onClick={() => handleMobileNavClick(tab)}
-                      className={`text-2xl font-black tracking-tight text-left flex items-center gap-3
-                        ${resolvedCurrentPage === tab.page ? 'text-nofx-gold' : 'text-zinc-500'}`}
+                      className={`w-full rounded-lg px-3 py-2 text-xl font-extrabold tracking-tight text-left flex items-center gap-3 transition-colors
+                        ${resolvedCurrentPage === tab.page ? 'text-nofx-gold bg-nofx-gold/10 border border-nofx-gold/20' : 'text-zinc-200 hover:bg-white/5'}`}
                     >
                       {resolvedCurrentPage === tab.page && (
                         <motion.div
@@ -554,7 +572,7 @@ export default function HeaderBar({
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.5 + i * 0.1 }}
                         href={`#${item.key === 'features' ? 'features' : 'how-it-works'}`}
-                        className="block text-lg font-mono text-zinc-600 hover:text-white"
+                        className="block text-base font-mono text-zinc-300 hover:text-white"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         {'>'} {item.label}
