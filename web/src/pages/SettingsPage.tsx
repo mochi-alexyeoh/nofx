@@ -63,9 +63,19 @@ export function SettingsPage() {
   // Admin invite management
   const [inviteCodes, setInviteCodes] = useState<InviteCodeItem[]>([])
   const [inviteCount, setInviteCount] = useState(10)
+  const [inviteDurationDays, setInviteDurationDays] = useState(30)
   const [generatedCodes, setGeneratedCodes] = useState<string[]>([])
   const [loadingInvites, setLoadingInvites] = useState(false)
   const [generatingInvites, setGeneratingInvites] = useState(false)
+  const [redeemCode, setRedeemCode] = useState('')
+  const [redeemingCode, setRedeemingCode] = useState(false)
+  const [entitlementInfo, setEntitlementInfo] = useState<{
+    active: boolean
+    entitlement_expires_at?: string | null
+    latest_redeemed_code?: string
+    latest_redeemed_used_at?: string | null
+    latest_redeemed_days?: number
+  } | null>(null)
   const isAdmin = user?.role === 'admin'
 
   const refreshModelConfigs = async () => {
@@ -109,6 +119,11 @@ export function SettingsPage() {
     window.addEventListener('agent-config-refresh', handleRefresh)
     return () => window.removeEventListener('agent-config-refresh', handleRefresh)
   }, [])
+
+  useEffect(() => {
+    if (activeTab !== 'account') return
+    api.getMyEntitlementStatus().then(setEntitlementInfo).catch(() => {})
+  }, [activeTab])
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -331,10 +346,10 @@ export function SettingsPage() {
     const count = Math.max(1, Math.min(200, Math.floor(inviteCount || 1)))
     setGeneratingInvites(true)
     try {
-      const codes = await api.generateInviteCodes(count)
+      const codes = await api.generateInviteCodes(count, inviteDurationDays)
       setGeneratedCodes(codes)
       await refreshInvites()
-      toast.success(`Generated ${codes.length} invite code(s)`)
+      toast.success(`Generated ${codes.length} invite code(s) (${inviteDurationDays}-day)`)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to generate invite codes')
     } finally {
@@ -349,6 +364,30 @@ export function SettingsPage() {
       toast.success('Copied generated invite codes')
     } catch {
       toast.error('Failed to copy')
+    }
+  }
+
+
+  const handleRedeemCode = async () => {
+    const code = redeemCode.trim()
+    if (!code) {
+      toast.error('Please enter an invite code')
+      return
+    }
+    setRedeemingCode(true)
+    try {
+      const result = await api.redeemInviteCode(code)
+      setRedeemCode('')
+      toast.success(
+        result?.entitlement_expires_at
+          ? `Account activated until ${result.entitlement_expires_at}`
+          : 'Account activated'
+      )
+      api.getMyEntitlementStatus().then(setEntitlementInfo).catch(() => {})
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to redeem invite code')
+    } finally {
+      setRedeemingCode(false)
     }
   }
 
@@ -434,6 +473,40 @@ export function SettingsPage() {
                     {changingPassword ? 'Updating...' : 'Update Password'}
                   </button>
                 </form>
+              </div>
+
+              <div className="border-t border-zinc-800 pt-6 space-y-3">
+                <h3 className="text-sm font-semibold text-white">Redeem Activation Code</h3>
+                <div className="text-xs text-zinc-400 space-y-1">
+                  <div>
+                    Status:{' '}
+                    <span className={entitlementInfo?.active ? 'text-emerald-400' : 'text-red-400'}>
+                      {entitlementInfo?.active ? 'Active' : 'Expired'}
+                    </span>
+                  </div>
+                  <div>
+                    Expires: {entitlementInfo?.entitlement_expires_at || 'Unlimited / Not set'}
+                  </div>
+                  <div>
+                    Current Code: {entitlementInfo?.latest_redeemed_code || '-'}
+                    {entitlementInfo?.latest_redeemed_days ? ` (${entitlementInfo.latest_redeemed_days}-day)` : ''}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    value={redeemCode}
+                    onChange={(e) => setRedeemCode(e.target.value.toUpperCase())}
+                    placeholder="ABCD1-EFGH-IJKL"
+                    className="flex-1 bg-zinc-950/80 border border-zinc-700/80 rounded-xl px-3 py-2 text-sm text-white"
+                  />
+                  <button
+                    onClick={handleRedeemCode}
+                    disabled={redeemingCode}
+                    className="bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-semibold px-4 py-2 rounded-xl text-sm disabled:opacity-60"
+                  >
+                    {redeemingCode ? 'Redeeming...' : 'Redeem'}
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -601,15 +674,27 @@ export function SettingsPage() {
               <div className="rounded-xl border border-zinc-700/70 bg-zinc-900/50 p-4 space-y-3">
                 <h3 className="text-sm font-semibold text-white">Invite Code Generator</h3>
                 <p className="text-xs text-zinc-400">Generate one-time codes for new user registration.</p>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
                   <input
                     type="number"
                     min={1}
                     max={200}
                     value={inviteCount}
                     onChange={(e) => setInviteCount(Number(e.target.value || 1))}
-                    className="w-28 bg-zinc-950/80 border border-zinc-700/80 rounded-xl px-3 py-2 text-sm text-white"
+                    className="w-24 bg-zinc-950/80 border border-zinc-700/80 rounded-xl px-3 py-2 text-sm text-white"
+                    title="Count"
                   />
+                  <select
+                    value={inviteDurationDays}
+                    onChange={(e) => setInviteDurationDays(Number(e.target.value))}
+                    className="bg-zinc-950/80 border border-zinc-700/80 rounded-xl px-3 py-2 text-sm text-white"
+                    title="Trial duration"
+                  >
+                    <option value={7}>7-day trial</option>
+                    <option value={30}>30-day trial</option>
+                    <option value={90}>90-day trial</option>
+                    <option value={365}>365-day trial</option>
+                  </select>
                   <button
                     onClick={handleGenerateInvites}
                     disabled={generatingInvites}
@@ -632,9 +717,10 @@ export function SettingsPage() {
                     className="w-full min-h-[120px] bg-zinc-950/80 border border-zinc-700/80 rounded-xl px-3 py-2 text-xs text-emerald-300 font-mono"
                   />
                 )}
+
               </div>
 
-              <div className="rounded-xl border border-zinc-700/70 bg-zinc-900/50 p-4">
+              <div className="rounded-xl border border-zinc-700/70 bg-zinc-900/50 p-4 space-y-4">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-semibold text-white">Invite Code History</h3>
                   <button
@@ -668,6 +754,7 @@ export function SettingsPage() {
                           {item.used_at
                             ? `Used by ${item.used_by || 'unknown'} at ${item.used_at}`
                             : `Created at ${item.created_at || '-'}`}
+                          {item.duration_days ? ` · ${item.duration_days}-day` : ''}
                         </div>
                       </div>
                     ))}

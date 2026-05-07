@@ -123,18 +123,20 @@ func (s *Server) handleRegister(c *gin.Context) {
 		Role:         role,
 	}
 
+	var consumedInvite *store.InviteCode
 	err = s.store.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(user).Error; err != nil {
 			return err
 		}
 		if inviteOnly && userCount > 0 {
-			ok, err := store.NewInviteCodeStore(tx).Consume(inviteCode, user.ID)
+			invite, ok, err := store.NewInviteCodeStore(tx).Consume(inviteCode, user.ID)
 			if err != nil {
 				return err
 			}
 			if !ok {
 				return fmt.Errorf("invalid or used invite code")
 			}
+			consumedInvite = invite
 		}
 		return nil
 	})
@@ -145,6 +147,12 @@ func (s *Server) handleRegister(c *gin.Context) {
 		}
 		SafeInternalError(c, "Failed to create user", err)
 		return
+	}
+
+	// Apply entitlement duration for invite-based registration (trial/activation code)
+	var entitlementExpiresAt *time.Time
+	if consumedInvite != nil && consumedInvite.DurationDays > 0 {
+		entitlementExpiresAt, _ = s.store.User().ExtendEntitlement(user.ID, consumedInvite.DurationDays)
 	}
 
 	// Adopt orphan records from previous account (e.g. after account reset)
@@ -165,11 +173,12 @@ func (s *Server) handleRegister(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"token":   token,
-		"user_id": user.ID,
-		"email":   user.Email,
-		"role":    user.Role,
-		"message": "Registration successful",
+		"token":                  token,
+		"user_id":                user.ID,
+		"email":                  user.Email,
+		"role":                   user.Role,
+		"entitlement_expires_at": entitlementExpiresAt,
+		"message":                "Registration successful",
 	})
 }
 
@@ -206,11 +215,12 @@ func (s *Server) handleLogin(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"token":   token,
-		"user_id": user.ID,
-		"email":   user.Email,
-		"role":    user.Role,
-		"message": "Login successful",
+		"token":                  token,
+		"user_id":                user.ID,
+		"email":                  user.Email,
+		"role":                   user.Role,
+		"entitlement_expires_at": user.EntitlementExpiresAt,
+		"message":                "Login successful",
 	})
 }
 
@@ -325,7 +335,8 @@ func (s *Server) handleGenerateInviteCodes(c *gin.Context) {
 	}
 
 	var req struct {
-		Count int `json:"count"`
+		Count        int `json:"count"`
+		DurationDays int `json:"duration_days"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		SafeBadRequest(c, "Invalid request parameters")
@@ -338,6 +349,14 @@ func (s *Server) handleGenerateInviteCodes(c *gin.Context) {
 		SafeBadRequest(c, "count too large (max 200)")
 		return
 	}
+	allowedDurations := map[int]bool{7: true, 30: true, 90: true, 365: true}
+	if req.DurationDays == 0 {
+		req.DurationDays = 30
+	}
+	if !allowedDurations[req.DurationDays] {
+		SafeBadRequest(c, "duration_days must be one of: 7, 30, 90, 365")
+		return
+	}
 
 	codes := make([]string, 0, req.Count)
 	for len(codes) < req.Count {
@@ -346,7 +365,7 @@ func (s *Server) handleGenerateInviteCodes(c *gin.Context) {
 			SafeInternalError(c, "Failed to generate invite code", err)
 			return
 		}
-		if err := s.store.InviteCode().Create(code, userID); err != nil {
+		if err := s.store.InviteCode().Create(code, userID, req.DurationDays); err != nil {
 			if strings.Contains(strings.ToLower(err.Error()), "unique") || strings.Contains(strings.ToLower(err.Error()), "duplicate") {
 				continue
 			}
@@ -356,7 +375,46 @@ func (s *Server) handleGenerateInviteCodes(c *gin.Context) {
 		codes = append(codes, code)
 	}
 
-	c.JSON(http.StatusOK, gin.H{"count": req.Count, "codes": codes})
+	c.JSON(http.StatusOK, gin.H{"count": req.Count, "duration_days": req.DurationDays, "codes": codes})
+}
+
+func (s *Server) handleRedeemInviteCode(c *gin.Context) {
+	userID := c.GetString("user_id")
+	var req struct {
+		InviteCode string `json:"invite_code"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		SafeBadRequest(c, "Invalid request parameters")
+		return
+	}
+	if strings.TrimSpace(req.InviteCode) == "" {
+		SafeBadRequest(c, "invite_code is required")
+		return
+	}
+
+	inv, ok, err := s.store.InviteCode().Consume(req.InviteCode, userID)
+	if err != nil {
+		SafeInternalError(c, "Failed to consume invite code", err)
+		return
+	}
+	if !ok || inv == nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid or used invite code"})
+		return
+	}
+	if inv.DurationDays <= 0 {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Invite code has no trial duration"})
+		return
+	}
+	expiresAt, err := s.store.User().ExtendEntitlement(userID, inv.DurationDays)
+	if err != nil {
+		SafeInternalError(c, "Failed to apply entitlement", err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message":                "Account reactivated",
+		"duration_days":          inv.DurationDays,
+		"entitlement_expires_at": expiresAt,
+	})
 }
 
 func (s *Server) handleListInviteCodes(c *gin.Context) {
@@ -378,6 +436,37 @@ func (s *Server) handleListInviteCodes(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"items": items})
 }
+
+func (s *Server) handleMyEntitlementStatus(c *gin.Context) {
+	userID := c.GetString("user_id")
+	now := time.Now().UTC()
+	active, expiresAt, err := s.store.User().IsEntitlementActive(userID, now)
+	if err != nil {
+		SafeInternalError(c, "Failed to get entitlement status", err)
+		return
+	}
+	latestCode, err := s.store.InviteCode().GetLatestUsedByUser(userID)
+	if err != nil {
+		SafeInternalError(c, "Failed to get latest invite code", err)
+		return
+	}
+	var code string
+	var usedAt *time.Time
+	var durationDays int
+	if latestCode != nil {
+		code = latestCode.Code
+		usedAt = latestCode.UsedAt
+		durationDays = latestCode.DurationDays
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"active":                  active,
+		"entitlement_expires_at":  expiresAt,
+		"latest_redeemed_code":    code,
+		"latest_redeemed_used_at": usedAt,
+		"latest_redeemed_days":    durationDays,
+	})
+}
+
 
 func generateInviteCode() (string, error) {
 	buf := make([]byte, 8)

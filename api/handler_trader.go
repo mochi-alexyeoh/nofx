@@ -751,6 +751,20 @@ func (s *Server) handleStartTrader(c *gin.Context) {
 		traderName = fullCfg.Trader.Name
 	}
 
+	active, expiresAt, entErr := s.store.User().IsEntitlementActive(userID, time.Now().UTC())
+	if entErr != nil {
+		SafeInternalError(c, "Failed to check account entitlement", entErr)
+		return
+	}
+	if !active {
+		msg := "Account entitlement expired. Please redeem a new invite code to reactivate."
+		if expiresAt != nil {
+			msg = fmt.Sprintf("Account entitlement expired at %s. Please redeem a new invite code to reactivate.", expiresAt.UTC().Format(time.RFC3339))
+		}
+		SafeBadRequestWithDetails(c, msg, "trader.start.entitlement_expired", nil)
+		return
+	}
+
 	// Check if trader exists in memory and if it's running
 	existingTrader, _ := s.traderManager.GetTrader(traderID)
 	if existingTrader != nil {

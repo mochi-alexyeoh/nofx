@@ -14,12 +14,13 @@ type InviteCodeStore struct {
 
 // InviteCode can be used once for registration.
 type InviteCode struct {
-	Code      string     `gorm:"primaryKey;size:64" json:"code"`
-	CreatedBy string     `gorm:"column:created_by;size:64" json:"created_by"`
-	UsedBy    string     `gorm:"column:used_by;size:64" json:"used_by"`
-	UsedAt    *time.Time `gorm:"column:used_at" json:"used_at"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
+	Code         string     `gorm:"primaryKey;size:64" json:"code"`
+	CreatedBy    string     `gorm:"column:created_by;size:64" json:"created_by"`
+	DurationDays int        `gorm:"column:duration_days;default:0" json:"duration_days"`
+	UsedBy       string     `gorm:"column:used_by;size:64" json:"used_by"`
+	UsedAt       *time.Time `gorm:"column:used_at" json:"used_at"`
+	CreatedAt    time.Time  `json:"created_at"`
+	UpdatedAt    time.Time  `json:"updated_at"`
 }
 
 func (InviteCode) TableName() string { return "invite_codes" }
@@ -36,8 +37,11 @@ func normalizeInviteCode(code string) string {
 	return strings.ToUpper(strings.TrimSpace(code))
 }
 
-func (s *InviteCodeStore) Create(code, createdBy string) error {
-	row := &InviteCode{Code: normalizeInviteCode(code), CreatedBy: createdBy}
+func (s *InviteCodeStore) Create(code, createdBy string, durationDays int) error {
+	if durationDays < 0 {
+		durationDays = 0
+	}
+	row := &InviteCode{Code: normalizeInviteCode(code), CreatedBy: createdBy, DurationDays: durationDays}
 	return s.db.Create(row).Error
 }
 
@@ -52,16 +56,25 @@ func (s *InviteCodeStore) IsUsable(code string) (bool, error) {
 	return count > 0, nil
 }
 
-// Consume atomically marks invite code as used. Returns false when invalid/used.
-func (s *InviteCodeStore) Consume(code, userID string) (bool, error) {
+// Consume atomically marks invite code as used and returns consumed row details.
+func (s *InviteCodeStore) Consume(code, userID string) (*InviteCode, bool, error) {
+	norm := normalizeInviteCode(code)
 	now := time.Now().UTC()
+	updates := map[string]interface{}{"used_by": userID, "used_at": now, "updated_at": now}
 	res := s.db.Model(&InviteCode{}).
-		Where("code = ? AND used_at IS NULL", normalizeInviteCode(code)).
-		Updates(map[string]interface{}{"used_by": userID, "used_at": now, "updated_at": now})
+		Where("code = ? AND used_at IS NULL", norm).
+		Updates(updates)
 	if res.Error != nil {
-		return false, res.Error
+		return nil, false, res.Error
 	}
-	return res.RowsAffected > 0, nil
+	if res.RowsAffected == 0 {
+		return nil, false, nil
+	}
+	var row InviteCode
+	if err := s.db.Where("code = ?", norm).First(&row).Error; err != nil {
+		return nil, false, err
+	}
+	return &row, true, nil
 }
 
 func (s *InviteCodeStore) List(limit int) ([]InviteCode, error) {
@@ -71,4 +84,18 @@ func (s *InviteCodeStore) List(limit int) ([]InviteCode, error) {
 	var rows []InviteCode
 	err := s.db.Order("created_at DESC").Limit(limit).Find(&rows).Error
 	return rows, err
+}
+
+func (s *InviteCodeStore) GetLatestUsedByUser(userID string) (*InviteCode, error) {
+	var row InviteCode
+	err := s.db.Where("used_by = ? AND used_at IS NOT NULL", userID).
+		Order("used_at DESC").
+		First(&row).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &row, nil
 }

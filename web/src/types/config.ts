@@ -170,6 +170,7 @@ export interface CurrentBeginnerWalletResponse {
 
 export interface InviteCodeItem {
   code: string
+  duration_days?: number
   created_by?: string
   used_by?: string
   used_at?: string | null

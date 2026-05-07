@@ -218,10 +218,10 @@ export const configApi = {
     return result.data
   },
 
-  async generateInviteCodes(count = 1): Promise<string[]> {
+  async generateInviteCodes(count = 1, durationDays = 30): Promise<string[]> {
     const result = await httpClient.post<{ count: number; codes: string[] }>(
       `${API_BASE}/invite-codes/generate`,
-      { count }
+      { count, duration_days: durationDays }
     )
     if (!result.success || !result.data) {
       throw new Error(result.message || 'Failed to generate invite codes')
@@ -238,4 +238,36 @@ export const configApi = {
     }
     return Array.isArray(result.data.items) ? result.data.items : []
   },
+
+  async redeemInviteCode(inviteCode: string): Promise<{ entitlement_expires_at?: string | null }> {
+    const result = await httpClient.post<{ entitlement_expires_at?: string | null }>(
+      `${API_BASE}/invite-codes/redeem`,
+      { invite_code: inviteCode }
+    )
+    if (!result.success) {
+      throw new Error(result.message || 'Failed to redeem invite code')
+    }
+    return result.data || {}
+  },
+
+  async getMyEntitlementStatus(): Promise<{
+    active: boolean
+    entitlement_expires_at?: string | null
+    latest_redeemed_code?: string
+    latest_redeemed_used_at?: string | null
+    latest_redeemed_days?: number
+  }> {
+    const result = await httpClient.get<{
+      active: boolean
+      entitlement_expires_at?: string | null
+      latest_redeemed_code?: string
+      latest_redeemed_used_at?: string | null
+      latest_redeemed_days?: number
+    }>(`${API_BASE}/invite-codes/my-status`)
+    if (!result.success || !result.data) {
+      throw new Error(result.message || 'Failed to fetch entitlement status')
+    }
+    return result.data
+  },
+
 }
