@@ -33,7 +33,7 @@ export default function FooterSection({ language }: FooterSectionProps) {
           {/* Brand */}
           <div className="md:col-span-1">
             <div className="flex items-center gap-3 mb-4">
-              <img src="/icons/nofx.png" alt="NexTech AI Logo" className="w-8 h-8" />
+              <img src="/icons/zessai.png" alt="NexTech AI Logo" className="w-8 h-8" />
               <span className="text-xl font-bold" style={{ color: '#EAECEF' }}>
                 NexTech AI
               </span>

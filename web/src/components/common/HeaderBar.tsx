@@ -92,7 +92,7 @@ export default function HeaderBar({
           className="flex items-center hover:opacity-80 transition-opacity cursor-pointer"
         >
           <img
-            src="/icons/nofx.png"
+            src="/icons/zessai.png"
             alt="NexTech Logo"
             className="h-10 w-[180px] object-contain object-left"
           />
