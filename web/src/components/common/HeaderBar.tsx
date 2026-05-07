@@ -433,12 +433,12 @@ export default function HeaderBar({
               type="button"
               aria-label="Close menu"
               onClick={() => setMobileMenuOpen(false)}
-              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/75"
             />
             <motion.div
-              initial={{ x: -20, opacity: 0 }}
+              initial={{ x: -12, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.05, duration: 0.22 }}
+              transition={{ duration: 0.12 }}
               className="relative z-10 flex flex-col h-[calc(100vh-64px)] w-[86vw] max-w-sm overflow-y-auto px-5 py-6 bg-[#0B0E11] border-r border-zinc-800 shadow-2xl"
             >
               {/* Navigation Links */}
@@ -531,9 +531,9 @@ export default function HeaderBar({
                   return navTabs.filter((tab) => !tab.hidden).map((tab, i) => (
                     <motion.button
                       key={tab.page}
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 0.1 + i * 0.05 }}
+                      initial={false}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.08 }}
                       onClick={() => handleMobileNavClick(tab)}
                       className={`w-full rounded-lg px-3 py-2 text-xl font-extrabold tracking-tight text-left flex items-center gap-3 transition-colors
                         ${resolvedCurrentPage === tab.page ? 'text-nofx-gold bg-nofx-gold/10 border border-nofx-gold/20' : 'text-zinc-200 hover:bg-white/5'}`}
@@ -565,12 +565,12 @@ export default function HeaderBar({
                     {[
                       { key: 'features', label: t('features', language) },
                       { key: 'howItWorks', label: t('howItWorks', language) },
-                    ].map((item, i) => (
+                    ].map((item) => (
                       <motion.a
                         key={item.key}
-                        initial={{ opacity: 0 }}
+                        initial={false}
                         animate={{ opacity: 1 }}
-                        transition={{ delay: 0.5 + i * 0.1 }}
+                        transition={{ duration: 0.08 }}
                         href={`#${item.key === 'features' ? 'features' : 'how-it-works'}`}
                         className="block text-base font-mono text-zinc-300 hover:text-white"
                         onClick={() => setMobileMenuOpen(false)}
