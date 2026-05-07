@@ -78,7 +78,7 @@ export default function DeploymentHub() {
 
                             {/* Terminal Content */}
                             <div className="p-8 font-mono text-sm md:text-base bg-black/50 backdrop-blur-sm min-h-[200px] flex flex-col justify-center">
-                                <div className="mb-2 text-zinc-500 text-xs tracking-wide"># Initialize NexTech AI Protocol</div>
+                                <div className="mb-2 text-zinc-500 text-xs tracking-wide"># Initialize Zess AI Protocol</div>
                                 <div
                                     className="group relative flex items-start gap-3 p-4 rounded-lg bg-zinc-900/50 border border-zinc-800 hover:border-nofx-gold/50 cursor-pointer transition-all hover:bg-zinc-900/80"
                                     onClick={handleCopy}
