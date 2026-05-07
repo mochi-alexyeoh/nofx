@@ -93,7 +93,7 @@ export default function HeaderBar({
         >
           <img
             src="/icons/zessai.png"
-            alt="NexTech Logo"
+            alt="Zess Logo"
             className="h-10 w-[180px] object-contain object-left"
           />
         </div>
