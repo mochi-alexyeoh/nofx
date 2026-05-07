@@ -528,7 +528,7 @@ export default function HeaderBar({
                     setMobileMenuOpen(false)
                   }
 
-                  return navTabs.filter((tab) => !tab.hidden).map((tab, i) => (
+                  return navTabs.filter((tab) => !tab.hidden).map((tab) => (
                     <motion.button
                       key={tab.page}
                       initial={false}
