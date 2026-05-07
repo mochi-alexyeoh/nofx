@@ -433,7 +433,7 @@ export default function HeaderBar({
           className={`relative z-10 flex flex-col h-[calc(100vh-64px)] w-[86vw] max-w-sm overflow-y-auto px-5 py-6 bg-[#0B0E11] border-r border-zinc-800 shadow-2xl transition-transform duration-100 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
         >
               {/* Navigation Links */}
-              <div className="flex flex-col gap-6 mb-12">
+              <div className="flex flex-col gap-4 mb-5">
                 {(() => {
                   const navTabs: {
                     page: Page
@@ -547,7 +547,7 @@ export default function HeaderBar({
               </div>
 
               {/* Bottom Actions */}
-              <div className="mt-auto space-y-8">
+              <div className="mt-6 space-y-5">
                 {/* Social Links */}
                 <div className="flex items-center gap-4">
                   {[
