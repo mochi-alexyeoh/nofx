@@ -44,20 +44,19 @@ export default function FooterSection({ language }: FooterSectionProps) {
             {/* Social Icons */}
             <div className="flex items-center gap-3">
               {links.social.map((link) => (
-                <a
+                <button
                   key={link.name}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-lg flex items-center justify-center transition-all hover:scale-110"
+                  type="button"
+                  className="w-9 h-9 rounded-lg flex items-center justify-center"
                   style={{
                     background: 'rgba(255, 255, 255, 0.05)',
                     color: '#848E9C',
                   }}
                   title={link.name}
+                  aria-label={link.name}
                 >
                   <link.icon className="w-4 h-4" />
-                </a>
+                </button>
               ))}
             </div>
           </div>
@@ -70,15 +69,9 @@ export default function FooterSection({ language }: FooterSectionProps) {
             <ul className="space-y-3">
               {links.social.map((link) => (
                 <li key={link.name}>
-                  <a
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm transition-colors hover:text-[#F0B90B]"
-                    style={{ color: '#5E6673' }}
-                  >
+                  <span className="text-sm" style={{ color: '#5E6673' }}>
                     {link.name}
-                  </a>
+                  </span>
                 </li>
               ))}
             </ul>
@@ -91,16 +84,13 @@ export default function FooterSection({ language }: FooterSectionProps) {
             </h4>
             <div className="flex flex-wrap gap-2">
               {links.supporters.map((link) => (
-                <a
+                <span
                   key={link.name}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs border border-zinc-800 bg-zinc-900/50 rounded px-3 py-1.5 transition-all hover:border-[#F0B90B] hover:text-[#F0B90B] hover:bg-[#F0B90B]/10 hover:shadow-[0_0_10px_rgba(240,185,11,0.2)]"
+                  className="text-xs border border-zinc-800 bg-zinc-900/50 rounded px-3 py-1.5"
                   style={{ color: '#848E9C' }}
                 >
                   {link.name}
-                </a>
+                </span>
               ))}
             </div>
           </div>
