@@ -12,16 +12,16 @@ html {
 
 :root {
   /* NoFX Neo-Gold Design System */
-  --nofx-gold: #F0B90B;
+  --nofx-gold: #0A57F5;
   --nofx-bg: #05070A;
   --nofx-accent: #00F0FF;
   --nofx-glass: rgba(5, 7, 10, 0.7);
-  --nofx-border: rgba(240, 185, 11, 0.2);
+  --nofx-border: rgba(10, 87, 245, 0.2);
 
   /* Cinematic Glows */
-  --glow-primary: 0 0 20px rgba(240, 185, 11, 0.3);
+  --glow-primary: 0 0 20px rgba(10, 87, 245, 0.3);
   --glow-accent: 0 0 20px rgba(0, 240, 255, 0.3);
-  --glow-text: 0 0 10px rgba(240, 185, 11, 0.5);
+  --glow-text: 0 0 10px rgba(10, 87, 245, 0.5);
 
   --background: #05070A;
   --header-bg: rgba(2, 3, 4, 0.85);
@@ -33,7 +33,7 @@ html {
   --panel-bg: rgba(14, 18, 23, 0.6);
   --panel-bg-hover: rgba(20, 24, 29, 0.8);
   --panel-border: rgba(255, 255, 255, 0.1);
-  --panel-border-hover: rgba(240, 185, 11, 0.5);
+  --panel-border-hover: rgba(10, 87, 245, 0.5);
 
   --foreground: #EAECEF;
   --text-primary: #EAECEF;
@@ -48,13 +48,13 @@ html {
   --binance-red: #F6465D;
   --binance-red-bg: rgba(246, 70, 93, 0.12);
   --binance-red-border: rgba(246, 70, 93, 0.3);
-  --binance-yellow: #F0B90B;
+  --binance-yellow: #0A57F5;
 
   /* Shadows */
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
-  --shadow-glow: 0 0 30px rgba(240, 185, 11, 0.15);
+  --shadow-glow: 0 0 30px rgba(10, 87, 245, 0.15);
 
   font-family: 'IBM Plex Mono', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   line-height: 1.6;
@@ -599,7 +599,7 @@ textarea::placeholder {
 .dev-custom-toast {
   padding: 12px 18px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #f0b90b, #df8c0c);
+  background: linear-gradient(135deg, #0a57f5, #0d46c7);
   color: #0a0a0a;
   font-weight: 600;
 }
