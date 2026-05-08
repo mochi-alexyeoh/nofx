@@ -89,7 +89,7 @@ export function GridConfigEditor({
                 { value: 'BNBUSDT', label: 'BNB/USDT' },
                 { value: 'XRPUSDT', label: 'XRP/USDT' },
                 { value: 'DOGEUSDT', label: 'DOGE/USDT' },
-                { value: 'XAUTUSDT', label: 'XAUT/USDT' },
+                { value: 'XAUUSDT', label: 'XAU/USDT' },
               ]}
             />
           </div>
