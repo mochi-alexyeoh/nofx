@@ -16,7 +16,7 @@ NC='\033[0m'
 
 INSTALL_DIR="${1:-$HOME/nofx}"
 COMPOSE_FILE="docker-compose.stable.yml"
-GITHUB_RAW="https://raw.githubusercontent.com/NoFxAiOS/nofx/release/stable"
+GITHUB_RAW="https://raw.githubusercontent.com/mochi-alexyeoh/nofx/release/stable"
 
 echo -e "${BLUE}"
 echo "╔════════════════════════════════════════════════════════════╗"
