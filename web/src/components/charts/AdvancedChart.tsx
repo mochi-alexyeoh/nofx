@@ -1158,30 +1158,6 @@ export function AdvancedChart({
           </div>
         )}
 
-        {/* NOFX watermark */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '20%',
-            right: '5%',
-            pointerEvents: 'none',
-            userSelect: 'none',
-            zIndex: 1,
-          }}
-        >
-          <div
-            style={{
-              fontSize: '56px',
-              fontWeight: '700',
-              color: 'rgba(240, 185, 11, 0.12)',
-              letterSpacing: '4px',
-              fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
-              textShadow: '0 2px 30px rgba(240, 185, 11, 0.2)',
-            }}
-          >
-            NOFX
-          </div>
-        </div>
       </div>
 
       {/* Error message */}

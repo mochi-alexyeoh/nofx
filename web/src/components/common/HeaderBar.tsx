@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Menu, X, ChevronDown, Settings, Linkedin, Facebook, Instagram } from 'lucide-react'
 import { t, type Language } from '../../i18n/translations'
 import {
@@ -26,7 +26,7 @@ interface HeaderBarProps {
 
 export default function HeaderBar({
   isLoggedIn = false,
-  isHomePage = false,
+  isHomePage: _isHomePage = false,
   currentPage,
   language = 'zh' as Language,
   onLanguageChange,
@@ -81,6 +81,18 @@ export default function HeaderBar({
     }
   }, [])
 
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [mobileMenuOpen])
+
   return (
     <nav className="fixed top-0 w-full z-50 header-bar">
       <div className="flex items-center justify-between h-16 px-4 sm:px-6 max-w-[1920px] mx-auto">
@@ -92,8 +104,8 @@ export default function HeaderBar({
           className="flex items-center hover:opacity-80 transition-opacity cursor-pointer"
         >
           <img
-            src="/icons/nofx.png"
-            alt="NexTech Logo"
+            src="/icons/zessai.png"
+            alt="Zess Logo"
             className="h-10 w-[180px] object-contain object-left"
           />
         </div>
@@ -406,25 +418,22 @@ export default function HeaderBar({
         </motion.button>
       </div>
 
-      {/* Mobile Menu Overlay */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 md:hidden bg-black/90 backdrop-blur-xl"
-            style={{ top: '64px' }} // Below header
-          >
-            <motion.div
-              initial={{ y: -20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.1, duration: 0.3 }}
-              className="flex flex-col h-[calc(100vh-64px)] overflow-y-auto px-6 py-8"
-            >
+      {/* Mobile Menu Overlay (always mounted for instant open on heavy landing page) */}
+      <div
+        className={`fixed inset-0 z-40 md:hidden transition-opacity duration-100 ${mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        style={{ top: '64px' }} // Below header
+      >
+        <button
+          type="button"
+          aria-label="Close menu"
+          onClick={() => setMobileMenuOpen(false)}
+          className="absolute inset-0 bg-black/75"
+        />
+        <div
+          className={`relative z-10 flex flex-col h-[calc(100vh-64px)] w-[86vw] max-w-sm overflow-y-auto px-5 py-6 bg-[#0B0E11] border-r border-zinc-800 shadow-2xl transition-transform duration-100 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        >
               {/* Navigation Links */}
-              <div className="flex flex-col gap-6 mb-12">
+              <div className="flex flex-col gap-4 mb-5">
                 {(() => {
                   const navTabs: {
                     page: Page
@@ -510,21 +519,15 @@ export default function HeaderBar({
                     setMobileMenuOpen(false)
                   }
 
-                  return navTabs.filter((tab) => !tab.hidden).map((tab, i) => (
-                    <motion.button
+                  return navTabs.filter((tab) => !tab.hidden).map((tab) => (
+                    <button
                       key={tab.page}
-                      initial={{ x: -20, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: 0.1 + i * 0.05 }}
                       onClick={() => handleMobileNavClick(tab)}
-                      className={`text-2xl font-black tracking-tight text-left flex items-center gap-3
-                        ${resolvedCurrentPage === tab.page ? 'text-nofx-gold' : 'text-zinc-500'}`}
+                      className={`w-full rounded-lg px-3 py-2 text-xl font-extrabold tracking-tight text-left flex items-center gap-3 transition-colors
+                        ${resolvedCurrentPage === tab.page ? 'text-nofx-gold bg-nofx-gold/10 border border-nofx-gold/20' : 'text-zinc-200 hover:bg-white/5'}`}
                     >
                       {resolvedCurrentPage === tab.page && (
-                        <motion.div
-                          layoutId="active-indicator"
-                          className="w-1.5 h-1.5 rounded-full bg-nofx-gold"
-                        />
+                        <div className="w-1.5 h-1.5 rounded-full bg-nofx-gold" />
                       )}
                       {tab.label}
                       {tab.badge && (
@@ -537,35 +540,14 @@ export default function HeaderBar({
                           LOGIN_REQ
                         </span>
                       )}
-                    </motion.button>
+                    </button>
                   ))
                 })()}
 
-                {/* Original Page Links */}
-                {isHomePage && (
-                  <div className="pt-6 border-t border-white/5 space-y-4">
-                    {[
-                      { key: 'features', label: t('features', language) },
-                      { key: 'howItWorks', label: t('howItWorks', language) },
-                    ].map((item, i) => (
-                      <motion.a
-                        key={item.key}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.5 + i * 0.1 }}
-                        href={`#${item.key === 'features' ? 'features' : 'how-it-works'}`}
-                        className="block text-lg font-mono text-zinc-600 hover:text-white"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        {'>'} {item.label}
-                      </motion.a>
-                    ))}
-                  </div>
-                )}
               </div>
 
               {/* Bottom Actions */}
-              <div className="mt-auto space-y-8">
+              <div className="mt-6 space-y-5">
                 {/* Social Links */}
                 <div className="flex items-center gap-4">
                   {[
@@ -662,10 +644,8 @@ export default function HeaderBar({
                   )}
                 </div>
               </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      </div>
     </nav>
   )
 }

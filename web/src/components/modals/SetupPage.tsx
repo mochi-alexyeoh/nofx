@@ -9,7 +9,7 @@ import { LanguageSwitcher } from '../common/LanguageSwitcher'
 
 const labels = {
   zh: {
-    welcome: '欢迎使用 NexTech AI Trade',
+    welcome: '欢迎使用 Zess AI Trade',
     subtitle: '创建账号开始使用',
     email: '邮箱',
     emailPlaceholder: 'you@example.com',
@@ -22,7 +22,7 @@ const labels = {
     singleUser: '单用户系统 — 这是唯一的账号',
   },
   en: {
-    welcome: 'Welcome to NexTech AI Trade',
+    welcome: 'Welcome to Zess AI Trade',
     subtitle: 'Create your account to get started',
     email: 'Email',
     emailPlaceholder: 'you@example.com',
@@ -35,7 +35,7 @@ const labels = {
     singleUser: 'Single-user system — this is the only account',
   },
   id: {
-    welcome: 'Selamat Datang di NexTech AI Trade',
+    welcome: 'Selamat Datang di Zess AI Trade',
     subtitle: 'Buat akun untuk memulai',
     email: 'Email',
     emailPlaceholder: 'you@example.com',
@@ -138,7 +138,7 @@ export function SetupPage() {
             <div className="flex justify-center mb-4">
               <div className="relative">
                 <div className="absolute -inset-4 bg-nofx-gold/20 rounded-full blur-2xl" />
-                <img src="/icons/nofx.png" alt="NOFX" className="w-14 h-14 relative z-10 drop-shadow-[0_0_15px_rgba(240,185,11,0.3)]" />
+                <img src="/icons/zessai.png" alt="NOFX" className="w-14 h-14 relative z-10 drop-shadow-[0_0_15px_rgba(240,185,11,0.3)]" />
               </div>
             </div>
             <h1 className="text-2xl font-bold text-white mb-1.5">{l.welcome}</h1>

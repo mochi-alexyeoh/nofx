@@ -77,8 +77,6 @@ export interface GridStrategyConfig {
   max_drawdown_pct: number;
   // Stop loss percentage per position
   stop_loss_pct: number;
-  // Take profit percentage per position
-  take_profit_pct: number;
   // Daily loss limit percentage
   daily_loss_limit_pct: number;
   // Use maker-only orders for lower fees

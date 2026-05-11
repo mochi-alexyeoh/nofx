@@ -607,7 +607,7 @@ function Claw402ConfigForm({
     }
   }
 
-  const balanceNum = usdcBalance ? parseFloat(usdcBalance) : 0
+  const balanceNum = resolvedUsdcBalance ? parseFloat(resolvedUsdcBalance) : 0
 
   return (
     <form onSubmit={onSubmit} className="space-y-5">
@@ -986,7 +986,7 @@ function Claw402ConfigForm({
         </div>
 
         {/* Wallet Validation Results */}
-        {apiKey && (
+        {(apiKey || hasExistingWallet) && (
           <div className="space-y-2 pl-1">
             {/* Validating spinner */}
             {validating && (
@@ -1011,7 +1011,7 @@ function Claw402ConfigForm({
             )}
 
             {/* Success: address + balance + status */}
-            {walletAddress && !validating && !keyError && (
+            {resolvedWalletAddress && !validating && !keyError && (
               <>
                 <div
                   className="p-2.5 rounded-lg"
@@ -1027,7 +1027,7 @@ function Claw402ConfigForm({
                     <button
                       type="button"
                       onClick={() => {
-                        navigator.clipboard.writeText(walletAddress)
+                        navigator.clipboard.writeText(resolvedWalletAddress)
                         setCopiedAddr(true)
                         setTimeout(() => setCopiedAddr(false), 2000)
                       }}
@@ -1058,7 +1058,7 @@ function Claw402ConfigForm({
                       : 'Please confirm this is your wallet address (verify in MetaMask)'}
                   </div>
                 </div>
-                {usdcBalance !== null && (
+                {resolvedUsdcBalance !== null && (
                   <div className="flex items-center gap-2 text-xs">
                     <span>💰</span>
                     <span
@@ -1134,7 +1134,7 @@ function Claw402ConfigForm({
                         <button
                           type="button"
                           onClick={() => {
-                            navigator.clipboard.writeText(walletAddress)
+                            navigator.clipboard.writeText(resolvedWalletAddress)
                             setCopiedAddr(true)
                             setTimeout(() => setCopiedAddr(false), 2000)
                           }}

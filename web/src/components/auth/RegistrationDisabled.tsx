@@ -17,7 +17,7 @@ export function RegistrationDisabled() {
     >
       <div className="text-center max-w-md px-6">
         <img
-          src="/icons/nofx.png"
+          src="/icons/zessai.png"
           alt="NoFx Logo"
           className="w-16 h-16 mx-auto mb-4"
         />

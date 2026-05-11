@@ -127,7 +127,7 @@ export function BeginnerOnboardingPage() {
                   : 'text-[13px] tracking-[0.12em] lg:whitespace-nowrap'
               }`}
             >
-              Claw402 + DeepSeek <span className="mx-2 text-zinc-700">·</span>
+              x402 + DeepSeek <span className="mx-2 text-zinc-700">·</span>
               {isZh ? '按次付费' : 'Pay per call'}
             </div>
           </div>
