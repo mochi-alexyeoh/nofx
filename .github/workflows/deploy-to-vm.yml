@@ -1,0 +1,26 @@
+name: Deployment
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    name: "Deploy to Production (VM)"
+    runs-on: ubuntu-latest
+    environment: Production (VM)
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1
+        env:
+          PROJECT_PATH: ${{ vars.VM_PROJECT_PATH }}
+        with:
+          host: ${{ secrets.VM_PRODUCTION_SERVER_HOST }}
+          username: ${{ secrets.VM_PRODUCTION_SERVER_USERNAME }}
+          key: ${{ secrets.VM_PRODUCTION_SERVER_SSH_KEY }}
+          envs: PROJECT_PATH
+          script_path: .github/workflows/scripts/deployment_vm.sh
