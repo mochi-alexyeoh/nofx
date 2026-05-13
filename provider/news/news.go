@@ -1,10 +1,12 @@
 package news
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"sort"
 	"strings"
 	"time"
@@ -13,6 +15,7 @@ import (
 var defaultFeeds = []string{
 	"https://cointelegraph.com/rss",
 	"https://www.coindesk.com/arc/outboundfeeds/rss/",
+	"https://www.theblock.co/rss.xml",
 }
 
 type Item struct {
@@ -24,15 +27,28 @@ type Item struct {
 	Sentiment   float64   `json:"sentiment"` // [-1,1]
 }
 
+type Config struct {
+	EnableCryptoPanic bool
+	CryptoPanicAPIKey string
+}
+
 type Client struct {
-	httpClient *http.Client
-	feeds      []string
+	httpClient        *http.Client
+	feeds             []string
+	enableCryptoPanic bool
+	cryptoPanicAPIKey string
 }
 
 func NewClient() *Client {
+	return NewClientWithConfig(Config{})
+}
+
+func NewClientWithConfig(cfg Config) *Client {
 	return &Client{
-		httpClient: &http.Client{Timeout: 8 * time.Second},
-		feeds:      defaultFeeds,
+		httpClient:        &http.Client{Timeout: 8 * time.Second},
+		feeds:             defaultFeeds,
+		enableCryptoPanic: cfg.EnableCryptoPanic,
+		cryptoPanicAPIKey: strings.TrimSpace(cfg.CryptoPanicAPIKey),
 	}
 }
 
@@ -62,6 +78,20 @@ func (c *Client) Fetch(symbols []string, lookbackHours int, maxItems int) ([]Ite
 			}
 			seen[key] = true
 			items = append(items, it)
+		}
+	}
+
+	if c.enableCryptoPanic && c.cryptoPanicAPIKey != "" {
+		cpItems, err := c.fetchCryptoPanic(targets, since)
+		if err == nil {
+			for _, it := range cpItems {
+				key := strings.ToLower(strings.TrimSpace(it.Title))
+				if key == "" || seen[key] {
+					continue
+				}
+				seen[key] = true
+				items = append(items, it)
+			}
 		}
 	}
 
@@ -117,7 +147,7 @@ func parseRSS(body []byte, targets map[string]bool, since time.Time, source stri
 			continue
 		}
 		syms := matchSymbols(it.Title, targets)
-		if len(syms) == 0 {
+		if len(syms) == 0 && !isRelevantHeadline(it.Title) {
 			continue
 		}
 		result = append(result, Item{Title: strings.TrimSpace(it.Title), Link: strings.TrimSpace(it.Link), Source: sourceHost(source), PublishedAt: t, Symbols: syms, Sentiment: sentimentScore(it.Title)})
@@ -145,10 +175,97 @@ func parseAtom(body []byte, targets map[string]bool, since time.Time, source str
 			continue
 		}
 		syms := matchSymbols(it.Title, targets)
-		if len(syms) == 0 {
+		if len(syms) == 0 && !isRelevantHeadline(it.Title) {
 			continue
 		}
 		result = append(result, Item{Title: strings.TrimSpace(it.Title), Link: strings.TrimSpace(it.Link.Href), Source: sourceHost(source), PublishedAt: t, Symbols: syms, Sentiment: sentimentScore(it.Title)})
+	}
+	return result, nil
+}
+
+func (c *Client) fetchCryptoPanic(targets map[string]bool, since time.Time) ([]Item, error) {
+	endpoint, _ := url.Parse("https://cryptopanic.com/api/v1/posts/")
+	q := endpoint.Query()
+	q.Set("auth_token", c.cryptoPanicAPIKey)
+	q.Set("kind", "news")
+	q.Set("public", "true")
+	if len(targets) > 0 {
+		coins := make([]string, 0, len(targets))
+		for token := range targets {
+			if len(token) <= 6 && token != "BITCOIN" && token != "ETHEREUM" && token != "RIPPLE" && token != "SOLANA" {
+				coins = append(coins, token)
+			}
+		}
+		sort.Strings(coins)
+		if len(coins) > 0 {
+			q.Set("currencies", strings.Join(coins, ","))
+		}
+	}
+	endpoint.RawQuery = q.Encode()
+
+	req, _ := http.NewRequest(http.MethodGet, endpoint.String(), nil)
+	req.Header.Set("User-Agent", "NOFX-NewsFetcher/1.0")
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, fmt.Errorf("cryptopanic status %d", resp.StatusCode)
+	}
+
+	var payload struct {
+		Results []struct {
+			Title       string `json:"title"`
+			PublishedAt string `json:"published_at"`
+			URL         string `json:"url"`
+			Currencies  []struct {
+				Code string `json:"code"`
+			} `json:"currencies"`
+			Source struct {
+				Title string `json:"title"`
+			} `json:"source"`
+		} `json:"results"`
+	}
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 2*1024*1024))
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(body, &payload); err != nil {
+		return nil, err
+	}
+
+	result := make([]Item, 0, len(payload.Results))
+	for _, r := range payload.Results {
+		t, ok := parseTime(r.PublishedAt)
+		if !ok || t.Before(since) {
+			continue
+		}
+		syms := make([]string, 0, len(r.Currencies))
+		for _, ccy := range r.Currencies {
+			cc := strings.ToUpper(strings.TrimSpace(ccy.Code))
+			if cc != "" {
+				syms = append(syms, cc)
+			}
+		}
+		if len(syms) == 0 {
+			syms = matchSymbols(r.Title, targets)
+		}
+		if len(syms) == 0 && !isRelevantHeadline(r.Title) {
+			continue
+		}
+		source := strings.TrimSpace(r.Source.Title)
+		if source == "" {
+			source = "CryptoPanic"
+		}
+		result = append(result, Item{
+			Title:       strings.TrimSpace(r.Title),
+			Link:        strings.TrimSpace(r.URL),
+			Source:      source,
+			PublishedAt: t,
+			Symbols:     syms,
+			Sentiment:   sentimentScore(r.Title),
+		})
 	}
 	return result, nil
 }
@@ -208,6 +325,24 @@ func sentimentScore(text string) float64 {
 	if score > 3 { score = 3 }
 	if score < -3 { score = -3 }
 	return score / 3.0
+}
+
+func isRelevantHeadline(title string) bool {
+	up := strings.ToUpper(strings.TrimSpace(title))
+	if up == "" {
+		return false
+	}
+	keywords := []string{
+		"CRYPTO", "BITCOIN", "ETHEREUM", "ALTCOIN", "BLOCKCHAIN", "TOKEN",
+		"ETF", "FED", "SEC", "CPI", "FOMC", "RATE CUT", "RATE HIKE",
+		"BINANCE", "COINBASE", "HACK", "REGULATION", "LIQUIDATION",
+	}
+	for _, k := range keywords {
+		if strings.Contains(up, k) {
+			return true
+		}
+	}
+	return false
 }
 
 func sourceHost(u string) string {

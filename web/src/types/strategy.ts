@@ -147,6 +147,8 @@ export interface IndicatorConfig {
   enable_news?: boolean;
   news_lookback_hours?: number;
   news_max_items?: number;
+  enable_cryptopanic_news?: boolean;
+  cryptopanic_api_key?: string;
 }
 
 export interface KlineConfig {

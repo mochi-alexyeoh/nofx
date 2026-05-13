@@ -857,7 +857,10 @@ func (e *StrategyEngine) FetchNewsData(symbols []string) []NewsItem {
 		maxItems = 20
 	}
 
-	client := news.NewClient()
+	client := news.NewClientWithConfig(news.Config{
+		EnableCryptoPanic: indicators.EnableCryptoPanicNews,
+		CryptoPanicAPIKey: indicators.CryptoPanicAPIKey,
+	})
 	items, err := client.Fetch(symbols, lookback, maxItems)
 	if err != nil {
 		logger.Warnf("⚠️  Failed to fetch news data: %v", err)
