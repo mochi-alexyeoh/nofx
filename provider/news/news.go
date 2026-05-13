@@ -147,7 +147,7 @@ func parseRSS(body []byte, targets map[string]bool, since time.Time, source stri
 			continue
 		}
 		syms := matchSymbols(it.Title, targets)
-		if len(syms) == 0 {
+		if len(syms) == 0 && !isRelevantHeadline(it.Title) {
 			continue
 		}
 		result = append(result, Item{Title: strings.TrimSpace(it.Title), Link: strings.TrimSpace(it.Link), Source: sourceHost(source), PublishedAt: t, Symbols: syms, Sentiment: sentimentScore(it.Title)})
@@ -175,7 +175,7 @@ func parseAtom(body []byte, targets map[string]bool, since time.Time, source str
 			continue
 		}
 		syms := matchSymbols(it.Title, targets)
-		if len(syms) == 0 {
+		if len(syms) == 0 && !isRelevantHeadline(it.Title) {
 			continue
 		}
 		result = append(result, Item{Title: strings.TrimSpace(it.Title), Link: strings.TrimSpace(it.Link.Href), Source: sourceHost(source), PublishedAt: t, Symbols: syms, Sentiment: sentimentScore(it.Title)})
@@ -251,7 +251,7 @@ func (c *Client) fetchCryptoPanic(targets map[string]bool, since time.Time) ([]I
 		if len(syms) == 0 {
 			syms = matchSymbols(r.Title, targets)
 		}
-		if len(syms) == 0 {
+		if len(syms) == 0 && !isRelevantHeadline(r.Title) {
 			continue
 		}
 		source := strings.TrimSpace(r.Source.Title)
@@ -325,6 +325,24 @@ func sentimentScore(text string) float64 {
 	if score > 3 { score = 3 }
 	if score < -3 { score = -3 }
 	return score / 3.0
+}
+
+func isRelevantHeadline(title string) bool {
+	up := strings.ToUpper(strings.TrimSpace(title))
+	if up == "" {
+		return false
+	}
+	keywords := []string{
+		"CRYPTO", "BITCOIN", "ETHEREUM", "ALTCOIN", "BLOCKCHAIN", "TOKEN",
+		"ETF", "FED", "SEC", "CPI", "FOMC", "RATE CUT", "RATE HIKE",
+		"BINANCE", "COINBASE", "HACK", "REGULATION", "LIQUIDATION",
+	}
+	for _, k := range keywords {
+		if strings.Contains(up, k) {
+			return true
+		}
+	}
+	return false
 }
 
 func sourceHost(u string) string {
