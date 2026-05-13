@@ -122,6 +122,12 @@ export const translations = {
         altcoinLeverageLabel: 'Altcoin leverage (x)',
         cacheAiLabel: 'Reuse AI cache',
         replayOnlyLabel: 'Replay only',
+        promptPresets: {
+          baseline: 'Baseline (Balanced)',
+          aggressive: 'Aggressive',
+          conservative: 'Conservative',
+          scalping: 'Scalping',
+        },
       },
       toasts: {
         selectModel: 'Please select an AI model first.',
@@ -1528,6 +1534,12 @@ export const translations = {
         altcoinLeverageLabel: '山寨币杠杆 (x)',
         cacheAiLabel: '复用 AI 缓存',
         replayOnlyLabel: '仅回放',
+        promptPresets: {
+          baseline: '基准（均衡）',
+          aggressive: '激进',
+          conservative: '保守',
+          scalping: '短线',
+        },
       },
       toasts: {
         selectModel: '请先选择 AI 模型。',
@@ -2874,6 +2886,12 @@ export const translations = {
         altcoinLeverageLabel: 'Leverage Altcoin (x)',
         cacheAiLabel: 'Pakai cache AI',
         replayOnlyLabel: 'Replay saja',
+        promptPresets: {
+          baseline: 'Baseline (Seimbang)',
+          aggressive: 'Agresif',
+          conservative: 'Konservatif',
+          scalping: 'Scalping',
+        },
       },
       toasts: {
         selectModel: 'Silakan pilih model AI dulu.',
