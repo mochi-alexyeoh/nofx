@@ -593,6 +593,9 @@ func (s *Server) handleStrategyTestRun(c *gin.Context) {
 	// Fetch Price ranking data (market-wide gainers/losers)
 	priceRankingData := engine.FetchPriceRankingData()
 
+	// Fetch News data (fundamental headlines)
+	newsItems := engine.FetchNewsData(symbols)
+
 	// Build real context (for generating User Prompt)
 	testContext := &kernel.Context{
 		CurrentTime:    time.Now().UTC().Format("2006-01-02 15:04:05 UTC"),
@@ -616,6 +619,7 @@ func (s *Server) handleStrategyTestRun(c *gin.Context) {
 		OIRankingData:      oiRankingData,
 		NetFlowRankingData: netFlowRankingData,
 		PriceRankingData:   priceRankingData,
+		NewsItems:          newsItems,
 	}
 
 	// Build System Prompt

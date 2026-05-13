@@ -58,6 +58,20 @@ func (c *StrategyConfig) ClampLimits() {
 		c.RiskControl.MaxPositions = MaxPositions
 	}
 
+	// Clamp news settings
+	if c.Indicators.NewsLookbackHours <= 0 {
+		c.Indicators.NewsLookbackHours = 12
+	}
+	if c.Indicators.NewsLookbackHours > 72 {
+		c.Indicators.NewsLookbackHours = 72
+	}
+	if c.Indicators.NewsMaxItems <= 0 {
+		c.Indicators.NewsMaxItems = 20
+	}
+	if c.Indicators.NewsMaxItems > 50 {
+		c.Indicators.NewsMaxItems = 50
+	}
+
 }
 
 // StrategyStore strategy storage
@@ -229,6 +243,11 @@ type IndicatorConfig struct {
 	EnablePriceRanking   bool   `json:"enable_price_ranking"`             // whether to enable price ranking data
 	PriceRankingDuration string `json:"price_ranking_duration,omitempty"` // durations: "1h" or "1h,4h,24h"
 	PriceRankingLimit    int    `json:"price_ranking_limit,omitempty"`    // number of entries per ranking (default 10)
+
+	// News fundamental data
+	EnableNews        bool `json:"enable_news"`
+	NewsLookbackHours int  `json:"news_lookback_hours,omitempty"`
+	NewsMaxItems      int  `json:"news_max_items,omitempty"`
 }
 
 // KlineConfig K-line configuration
@@ -358,6 +377,10 @@ func GetDefaultStrategyConfig(lang string) StrategyConfig {
 			EnablePriceRanking:   true,
 			PriceRankingDuration: "1h,4h,24h",
 			PriceRankingLimit:    10,
+			// News fundamental data (off by default)
+			EnableNews:           false,
+			NewsLookbackHours:    12,
+			NewsMaxItems:         20,
 		},
 		RiskControl: RiskControlConfig{
 			MaxPositions:                 3,   // Max 3 coins simultaneously (CODE ENFORCED)

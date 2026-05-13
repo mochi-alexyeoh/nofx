@@ -393,6 +393,26 @@ func (e *StrategyEngine) BuildUserPrompt(ctx *Context) string {
 		sb.WriteString(nofxos.FormatPriceRankingForAI(ctx.PriceRankingData, nofxosLang))
 	}
 
+	// News fundamental headlines
+	if len(ctx.NewsItems) > 0 {
+		sb.WriteString("## News & Fundamental Headlines\n")
+		sb.WriteString("Use these headlines as supplementary context (do not overreact to a single headline).\n\n")
+		for i, n := range ctx.NewsItems {
+			sentimentLabel := "neutral"
+			if n.Sentiment > 0.2 {
+				sentimentLabel = "positive"
+			} else if n.Sentiment < -0.2 {
+				sentimentLabel = "negative"
+			}
+			syms := ""
+			if len(n.Symbols) > 0 {
+				syms = fmt.Sprintf(" [%s]", strings.Join(n.Symbols, ","))
+			}
+			sb.WriteString(fmt.Sprintf("%d. %s%s | %s | %s\n", i+1, n.Title, syms, n.Source, sentimentLabel))
+		}
+		sb.WriteString("\n")
+	}
+
 	sb.WriteString("---\n\n")
 	sb.WriteString("Now please analyze and output your decision (Chain of Thought + JSON)\n")
 

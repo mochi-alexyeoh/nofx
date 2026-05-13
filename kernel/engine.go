@@ -10,6 +10,7 @@ import (
 	"nofx/logger"
 	"nofx/market"
 	"nofx/provider/hyperliquid"
+	"nofx/provider/news"
 	"nofx/provider/nofxos"
 	"nofx/security"
 	"nofx/store"
@@ -89,6 +90,15 @@ type RecentOrder struct {
 }
 
 // Context trading context (complete information passed to AI)
+type NewsItem struct {
+	Title       string   `json:"title"`
+	Source      string   `json:"source"`
+	PublishedAt string   `json:"published_at"`
+	Symbols     []string `json:"symbols,omitempty"`
+	Sentiment   float64  `json:"sentiment"`
+	Link        string   `json:"link,omitempty"`
+}
+
 type Context struct {
 	CurrentTime        string                             `json:"current_time"`
 	RuntimeMinutes     int                                `json:"runtime_minutes"`
@@ -106,6 +116,7 @@ type Context struct {
 	OIRankingData      *nofxos.OIRankingData              `json:"-"` // Market-wide OI ranking data
 	NetFlowRankingData *nofxos.NetFlowRankingData         `json:"-"` // Market-wide fund flow ranking data
 	PriceRankingData   *nofxos.PriceRankingData           `json:"-"` // Market-wide price gainers/losers
+	NewsItems          []NewsItem                         `json:"news_items,omitempty"`
 	BTCETHLeverage     int                                `json:"-"`
 	AltcoinLeverage    int                                `json:"-"`
 	Timeframes         []string                           `json:"-"`
@@ -831,6 +842,43 @@ func (e *StrategyEngine) FetchNetFlowRankingData() *nofxos.NetFlowRankingData {
 }
 
 // FetchPriceRankingData fetches market-wide price ranking data (gainers/losers)
+func (e *StrategyEngine) FetchNewsData(symbols []string) []NewsItem {
+	indicators := e.config.Indicators
+	if !indicators.EnableNews {
+		return nil
+	}
+
+	lookback := indicators.NewsLookbackHours
+	if lookback <= 0 {
+		lookback = 12
+	}
+	maxItems := indicators.NewsMaxItems
+	if maxItems <= 0 {
+		maxItems = 20
+	}
+
+	client := news.NewClient()
+	items, err := client.Fetch(symbols, lookback, maxItems)
+	if err != nil {
+		logger.Warnf("⚠️  Failed to fetch news data: %v", err)
+		return nil
+	}
+
+	result := make([]NewsItem, 0, len(items))
+	for _, it := range items {
+		result = append(result, NewsItem{
+			Title:       it.Title,
+			Source:      it.Source,
+			PublishedAt: it.PublishedAt.Format("2006-01-02 15:04 UTC"),
+			Symbols:     it.Symbols,
+			Sentiment:   it.Sentiment,
+			Link:        it.Link,
+		})
+	}
+	logger.Infof("📰 News data ready: %d items", len(result))
+	return result
+}
+
 func (e *StrategyEngine) FetchPriceRankingData() *nofxos.PriceRankingData {
 	indicators := e.config.Indicators
 	if !indicators.EnablePriceRanking {
