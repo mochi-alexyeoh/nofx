@@ -245,9 +245,11 @@ type IndicatorConfig struct {
 	PriceRankingLimit    int    `json:"price_ranking_limit,omitempty"`    // number of entries per ranking (default 10)
 
 	// News fundamental data
-	EnableNews        bool `json:"enable_news"`
-	NewsLookbackHours int  `json:"news_lookback_hours,omitempty"`
-	NewsMaxItems      int  `json:"news_max_items,omitempty"`
+	EnableNews             bool   `json:"enable_news"`
+	NewsLookbackHours      int    `json:"news_lookback_hours,omitempty"`
+	NewsMaxItems           int    `json:"news_max_items,omitempty"`
+	EnableCryptoPanicNews  bool   `json:"enable_cryptopanic_news,omitempty"`
+	CryptoPanicAPIKey      string `json:"cryptopanic_api_key,omitempty"`
 }
 
 // KlineConfig K-line configuration

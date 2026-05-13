@@ -435,23 +435,48 @@ AI Data Sources
                 </div>
                 <p className="text-[10px] mt-1" style={{ color: '#5E6673' }}>{ts(indicator.newsFundamentalDesc, language)}</p>
                 {config.enable_news && (
-                  <div className="flex gap-2 mt-2" onClick={(e) => e.stopPropagation()}>
-                    <NofxSelect
-                      value={config.news_lookback_hours || 12}
-                      onChange={(val) => !disabled && onChange({ ...config, news_lookback_hours: parseInt(val) })}
-                      disabled={disabled}
-                      className="flex-1 px-2 py-1 rounded text-[10px]"
-                      style={{ background: '#1E2329', border: '1px solid #2B3139', color: '#EAECEF' }}
-                      options={[{ value: 6, label: `6h ${ts(indicator.newsLookback, language)}` }, { value: 12, label: `12h ${ts(indicator.newsLookback, language)}` }, { value: 24, label: `24h ${ts(indicator.newsLookback, language)}` }]}
-                    />
-                    <NofxSelect
-                      value={config.news_max_items || 20}
-                      onChange={(val) => !disabled && onChange({ ...config, news_max_items: parseInt(val) })}
-                      disabled={disabled}
-                      className="w-24 px-2 py-1 rounded text-[10px]"
-                      style={{ background: '#1E2329', border: '1px solid #2B3139', color: '#EAECEF' }}
-                      options={[10, 20, 30, 40].map(n => ({ value: n, label: `${ts(indicator.newsMaxItems, language)} ${n}` }))}
-                    />
+                  <div className="space-y-2 mt-2" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex gap-2">
+                      <NofxSelect
+                        value={config.news_lookback_hours || 12}
+                        onChange={(val) => !disabled && onChange({ ...config, news_lookback_hours: parseInt(val) })}
+                        disabled={disabled}
+                        className="flex-1 px-2 py-1 rounded text-[10px]"
+                        style={{ background: '#1E2329', border: '1px solid #2B3139', color: '#EAECEF' }}
+                        options={[{ value: 6, label: `6h ${ts(indicator.newsLookback, language)}` }, { value: 12, label: `12h ${ts(indicator.newsLookback, language)}` }, { value: 24, label: `24h ${ts(indicator.newsLookback, language)}` }]}
+                      />
+                      <NofxSelect
+                        value={config.news_max_items || 20}
+                        onChange={(val) => !disabled && onChange({ ...config, news_max_items: parseInt(val) })}
+                        disabled={disabled}
+                        className="w-24 px-2 py-1 rounded text-[10px]"
+                        style={{ background: '#1E2329', border: '1px solid #2B3139', color: '#EAECEF' }}
+                        options={[10, 20, 30, 40].map(n => ({ value: n, label: `${ts(indicator.newsMaxItems, language)} ${n}` }))}
+                      />
+                    </div>
+
+                    <label className="flex items-center justify-between text-[10px]" style={{ color: '#EAECEF' }}>
+                      <span>{ts(indicator.useCryptoPanic, language)}</span>
+                      <input
+                        type="checkbox"
+                        checked={config.enable_cryptopanic_news || false}
+                        onChange={(e) => !disabled && onChange({ ...config, enable_cryptopanic_news: e.target.checked })}
+                        disabled={disabled}
+                        className="w-3.5 h-3.5 rounded accent-blue-500"
+                      />
+                    </label>
+
+                    {config.enable_cryptopanic_news && (
+                      <input
+                        type="password"
+                        value={config.cryptopanic_api_key || ''}
+                        onChange={(e) => !disabled && onChange({ ...config, cryptopanic_api_key: e.target.value })}
+                        placeholder={ts(indicator.cryptoPanicApiKey, language)}
+                        disabled={disabled}
+                        className="w-full px-2 py-1.5 rounded text-[10px]"
+                        style={{ background: '#1E2329', border: '1px solid #2B3139', color: '#EAECEF' }}
+                      />
+                    )}
                   </div>
                 )}
               </div>

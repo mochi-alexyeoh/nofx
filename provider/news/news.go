@@ -1,10 +1,12 @@
 package news
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"sort"
 	"strings"
 	"time"
@@ -24,15 +26,28 @@ type Item struct {
 	Sentiment   float64   `json:"sentiment"` // [-1,1]
 }
 
+type Config struct {
+	EnableCryptoPanic bool
+	CryptoPanicAPIKey string
+}
+
 type Client struct {
-	httpClient *http.Client
-	feeds      []string
+	httpClient        *http.Client
+	feeds             []string
+	enableCryptoPanic bool
+	cryptoPanicAPIKey string
 }
 
 func NewClient() *Client {
+	return NewClientWithConfig(Config{})
+}
+
+func NewClientWithConfig(cfg Config) *Client {
 	return &Client{
-		httpClient: &http.Client{Timeout: 8 * time.Second},
-		feeds:      defaultFeeds,
+		httpClient:        &http.Client{Timeout: 8 * time.Second},
+		feeds:             defaultFeeds,
+		enableCryptoPanic: cfg.EnableCryptoPanic,
+		cryptoPanicAPIKey: strings.TrimSpace(cfg.CryptoPanicAPIKey),
 	}
 }
 
@@ -62,6 +77,20 @@ func (c *Client) Fetch(symbols []string, lookbackHours int, maxItems int) ([]Ite
 			}
 			seen[key] = true
 			items = append(items, it)
+		}
+	}
+
+	if c.enableCryptoPanic && c.cryptoPanicAPIKey != "" {
+		cpItems, err := c.fetchCryptoPanic(targets, since)
+		if err == nil {
+			for _, it := range cpItems {
+				key := strings.ToLower(strings.TrimSpace(it.Title))
+				if key == "" || seen[key] {
+					continue
+				}
+				seen[key] = true
+				items = append(items, it)
+			}
 		}
 	}
 
@@ -216,6 +245,99 @@ func sourceHost(u string) string {
 	parts := strings.Split(u, "/")
 	if len(parts) > 0 { return parts[0] }
 	return u
+}
+
+func (c *Client) fetchCryptoPanic(targets map[string]bool, since time.Time) ([]Item, error) {
+	u, _ := url.Parse("https://cryptopanic.com/api/v1/posts/")
+	q := u.Query()
+	q.Set("auth_token", c.cryptoPanicAPIKey)
+	q.Set("kind", "news")
+	if len(targets) > 0 {
+		coins := make([]string, 0, len(targets))
+		for t := range targets {
+			if len(t) <= 6 && t != "BITCOIN" && t != "ETHEREUM" && t != "SOLANA" && t != "RIPPLE" {
+				coins = append(coins, t)
+			}
+		}
+		sort.Strings(coins)
+		if len(coins) > 0 {
+			q.Set("currencies", strings.Join(coins, ","))
+		}
+	}
+	u.RawQuery = q.Encode()
+
+	req, _ := http.NewRequest(http.MethodGet, u.String(), nil)
+	req.Header.Set("User-Agent", "NOFX-NewsFetcher/1.0")
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, fmt.Errorf("cryptopanic status %d", resp.StatusCode)
+	}
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 2*1024*1024))
+	if err != nil {
+		return nil, err
+	}
+
+	type cpResult struct {
+		Title     string `json:"title"`
+		Published string `json:"published_at"`
+		URL       string `json:"url"`
+		Currencies []struct {
+			Code string `json:"code"`
+		} `json:"currencies"`
+		Source struct {
+			Domain string `json:"domain"`
+			Title  string `json:"title"`
+		} `json:"source"`
+	}
+	type cpResp struct {
+		Results []cpResult `json:"results"`
+	}
+	var parsed cpResp
+	if err := json.Unmarshal(body, &parsed); err != nil {
+		return nil, err
+	}
+
+	result := make([]Item, 0, len(parsed.Results))
+	for _, it := range parsed.Results {
+		t, ok := parseTime(it.Published)
+		if !ok || t.Before(since) {
+			continue
+		}
+		title := strings.TrimSpace(it.Title)
+		if title == "" {
+			continue
+		}
+		syms := make([]string, 0, len(it.Currencies))
+		for _, c := range it.Currencies {
+			code := strings.ToUpper(strings.TrimSpace(c.Code))
+			if code != "" {
+				syms = append(syms, code)
+			}
+		}
+		if len(syms) == 0 {
+			syms = matchSymbols(title, targets)
+		}
+		if len(syms) == 0 {
+			continue
+		}
+		source := strings.TrimSpace(it.Source.Domain)
+		if source == "" {
+			source = "cryptopanic.com"
+		}
+		result = append(result, Item{
+			Title:       title,
+			Link:        strings.TrimSpace(it.URL),
+			Source:      source,
+			PublishedAt: t,
+			Symbols:     syms,
+			Sentiment:   sentimentScore(title),
+		})
+	}
+	return result, nil
 }
 
 func min(a, b int) int { if a < b { return a }; return b }

@@ -245,6 +245,8 @@ export const indicator = {
   newsFundamentalDesc: { zh: '外部新闻与宏观标题（辅助判断）', en: 'External news and macro headlines (supporting signal)', es: 'Noticias externas y macro (señal de apoyo)' },
   newsLookback: { zh: '回看时长', en: 'Lookback', es: 'Ventana' },
   newsMaxItems: { zh: '最大条数', en: 'Max Items', es: 'Máximo' },
+  useCryptoPanic: { zh: '使用 CryptoPanic (付费)', en: 'Use CryptoPanic (Paid)', es: 'Usar CryptoPanic (Pago)' },
+  cryptoPanicApiKey: { zh: 'CryptoPanic API Key', en: 'CryptoPanic API Key', es: 'API Key CryptoPanic' },
   duration: { zh: '周期', en: 'Duration', es: 'Duración' },
   limit: { zh: '数量', en: 'Limit', es: 'Límite' },
   aiCanCalculate: { zh: '💡 提示：AI 可自行计算这些指标，开启可减少 AI 计算量', en: '💡 Tip: AI can calculate these, enabling reduces AI workload', es: '💡 AI puede calcularlos' },
