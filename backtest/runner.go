@@ -571,6 +571,25 @@ func (r *Runner) buildDecisionContext(ts int64, marketData map[string]*market.Da
 		}
 	}
 
+	// Fetch News data if enabled in strategy
+	if strategyConfig.Indicators.EnableNews {
+		symbolSet := make(map[string]bool)
+		for _, sym := range r.cfg.Symbols {
+			symbolSet[sym] = true
+		}
+		for _, pos := range positions {
+			symbolSet[pos.Symbol] = true
+		}
+		symbols := make([]string, 0, len(symbolSet))
+		for sym := range symbolSet {
+			symbols = append(symbols, sym)
+		}
+		ctx.NewsItems = r.strategyEngine.FetchNewsData(symbols)
+		if len(ctx.NewsItems) > 0 {
+			logger.Infof("📰 Backtest: news data ready: %d items", len(ctx.NewsItems))
+		}
+	}
+
 	record := &store.DecisionRecord{
 		AccountState: store.AccountSnapshot{
 			TotalBalance:          accountInfo.TotalEquity,

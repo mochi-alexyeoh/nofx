@@ -594,6 +594,24 @@ func (at *AutoTrader) buildTradingContext() (*kernel.Context, error) {
 		}
 	}
 
+	// 12. Get News data (fundamental headlines)
+	if strategyConfig.Indicators.EnableNews {
+		symbolsToQuery := make(map[string]bool)
+		for _, coin := range candidateCoins {
+			symbolsToQuery[coin.Symbol] = true
+		}
+		for _, pos := range positionInfos {
+			symbolsToQuery[pos.Symbol] = true
+		}
+		symbols := make([]string, 0, len(symbolsToQuery))
+		for sym := range symbolsToQuery {
+			symbols = append(symbols, sym)
+		}
+
+		logger.Infof("📰 [%s] Fetching news data for %d symbols...", at.name, len(symbols))
+		ctx.NewsItems = at.strategyEngine.FetchNewsData(symbols)
+	}
+
 	return ctx, nil
 }
 
