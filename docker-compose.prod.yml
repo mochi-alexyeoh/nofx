@@ -10,7 +10,10 @@
 
 services:
   nofx:
-    image: ghcr.io/nofxaios/nofx/nofx-backend:latest
+    #image: ghcr.io/nofxaios/nofx/nofx-backend:latest
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.backend
     container_name: nofx-trading
     restart: unless-stopped
     stop_grace_period: 30s
@@ -28,24 +31,29 @@ services:
     networks:
       - nofx-network
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/health"]
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
 
   nofx-frontend:
-    image: ghcr.io/nofxaios/nofx/nofx-frontend:latest
+    #image: ghcr.io/nofxaios/nofx/nofx-frontend:latest
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.frontend.prod
     container_name: nofx-frontend
     restart: unless-stopped
     ports:
       - "${NOFX_FRONTEND_PORT:-3000}:80"
     networks:
       - nofx-network
+    environment:
+      - DOMAIN_NAME=${DOMAIN_NAME:-nofx.com}
     depends_on:
       - nofx
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1/health"]
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
