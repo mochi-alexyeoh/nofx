@@ -29,6 +29,8 @@ export function getModelDisplayName(modelId: string): string {
       return 'DeepSeek'
     case 'qwen':
       return 'Qwen'
+    case 'openrouter':
+      return 'OpenRouter'
     case 'claude':
       return 'Claude'
     default:
@@ -111,6 +113,11 @@ export const AI_PROVIDER_CONFIG: Record<string, AIProviderConfig> = {
     defaultModel: 'gpt-5.2',
     apiUrl: 'https://platform.openai.com/api-keys',
     apiName: 'OpenAI',
+  },
+  openrouter: {
+    defaultModel: 'openrouter/auto',
+    apiUrl: 'https://openrouter.ai/keys',
+    apiName: 'OpenRouter',
   },
   claude: {
     defaultModel: 'claude-opus-4-6',
