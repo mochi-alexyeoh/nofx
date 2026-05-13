@@ -1181,7 +1181,7 @@ export function BacktestPage() {
                           <option value="">{tr('form.selectAiModel')}</option>
                           {aiModels?.map((m) => (
                             <option key={m.id} value={m.id}>
-                              {m.name} ({m.provider}) {!m.enabled && '⚠️'}
+                              {m.provider === 'claw402' ? 'x402 AI' : `${m.name} (${m.provider})`} {!m.enabled && '⚠️'}
                             </option>
                           ))}
                         </select>
