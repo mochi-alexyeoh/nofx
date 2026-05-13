@@ -872,12 +872,12 @@ export function BacktestPage() {
 
     switch (sourceType) {
       case 'ai500':
-        return { type: 'AI500', limit: cs.ai500_limit || 30 }
+        return { type: 'Top500', limit: cs.ai500_limit || 30 }
       case 'oi_top':
         return { type: 'OI Top', limit: cs.oi_top_limit || 30 }
       case 'mixed':
         const sources = []
-        if (cs.use_ai500) sources.push(`AI500(${cs.ai500_limit || 30})`)
+        if (cs.use_ai500) sources.push(`Top500(${cs.ai500_limit || 30})`)
         if (cs.use_oi_top) sources.push(`OI Top(${cs.oi_top_limit || 30})`)
         if (cs.static_coins?.length) sources.push(`Static(${cs.static_coins.length})`)
         return { type: 'Mixed', desc: sources.join(' + ') }
