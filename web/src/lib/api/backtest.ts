@@ -9,7 +9,7 @@ import type {
   BacktestKlinesResponse,
   DecisionRecord,
 } from '../../types'
-import { API_BASE, httpClient } from './helpers'
+import { API_BASE, httpClient, getAuthHeaders } from './helpers'
 
 export const backtestApi = {
   async getBacktestRuns(params?: {
@@ -117,10 +117,12 @@ export const backtestApi = {
   },
 
   async exportBacktest(runId: string): Promise<Blob> {
+    const headers = getAuthHeaders()
+    // Export endpoint is GET and doesn't need JSON content-type
+    delete headers['Content-Type']
+
     const response = await fetch(`${API_BASE}/backtest/export?run_id=${encodeURIComponent(runId)}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
-      },
+      headers,
     })
     if (!response.ok) {
       const text = await response.text()
