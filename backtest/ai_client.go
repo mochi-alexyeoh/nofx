@@ -73,6 +73,13 @@ func configureMCPClient(cfg BacktestConfig, base mcp.AIClient) (mcp.AIClient, er
 		oaiC := mcpprovider.NewOpenAIClientWithOptions()
 		oaiC.(*mcpprovider.OpenAIClient).SetAPIKey(cfg.AICfg.APIKey, cfg.AICfg.BaseURL, cfg.AICfg.Model)
 		return oaiC, nil
+	case "openrouter":
+		if cfg.AICfg.APIKey == "" {
+			return nil, fmt.Errorf("openrouter provider requires api key")
+		}
+		orC := mcpprovider.NewOpenRouterClientWithOptions()
+		orC.(*mcpprovider.OpenRouterClient).SetAPIKey(cfg.AICfg.APIKey, cfg.AICfg.BaseURL, cfg.AICfg.Model)
+		return orC, nil
 	case "minimax":
 		if cfg.AICfg.APIKey == "" {
 			return nil, fmt.Errorf("minimax provider requires api key")

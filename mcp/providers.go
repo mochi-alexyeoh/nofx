@@ -6,6 +6,7 @@ package mcp
 const (
 	ProviderDeepSeek = "deepseek"
 	ProviderOpenAI   = "openai"
+	ProviderOpenRouter = "openrouter"
 	ProviderClaude   = "claude"
 	ProviderQwen     = "qwen"
 	ProviderGemini   = "gemini"
