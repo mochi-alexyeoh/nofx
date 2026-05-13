@@ -5,6 +5,7 @@ import (
 	"nofx/api"
 	nofxiagent "nofx/agent"
 	"nofx/auth"
+	"nofx/backtest"
 	"nofx/config"
 	"nofx/crypto"
 	"nofx/logger"
@@ -81,6 +82,9 @@ func main() {
 		logger.Fatalf("❌ Failed to initialize database: %v", err)
 	}
 	defer st.Close()
+
+	// Enable DB-backed persistence for Backtest Lab
+	backtest.UseDatabaseWithType(st.DB(), st.DBType() == store.DBTypePostgres)
 
 	// Initialize installation ID for experience improvement (anonymous statistics)
 	initInstallationID(st)
