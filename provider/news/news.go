@@ -15,6 +15,7 @@ import (
 var defaultFeeds = []string{
 	"https://cointelegraph.com/rss",
 	"https://www.coindesk.com/arc/outboundfeeds/rss/",
+	"https://www.theblock.co/rss.xml",
 }
 
 type Item struct {
