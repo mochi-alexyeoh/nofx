@@ -182,6 +182,93 @@ func parseAtom(body []byte, targets map[string]bool, since time.Time, source str
 	return result, nil
 }
 
+func (c *Client) fetchCryptoPanic(targets map[string]bool, since time.Time) ([]Item, error) {
+	endpoint, _ := url.Parse("https://cryptopanic.com/api/v1/posts/")
+	q := endpoint.Query()
+	q.Set("auth_token", c.cryptoPanicAPIKey)
+	q.Set("kind", "news")
+	q.Set("public", "true")
+	if len(targets) > 0 {
+		coins := make([]string, 0, len(targets))
+		for token := range targets {
+			if len(token) <= 6 && token != "BITCOIN" && token != "ETHEREUM" && token != "RIPPLE" && token != "SOLANA" {
+				coins = append(coins, token)
+			}
+		}
+		sort.Strings(coins)
+		if len(coins) > 0 {
+			q.Set("currencies", strings.Join(coins, ","))
+		}
+	}
+	endpoint.RawQuery = q.Encode()
+
+	req, _ := http.NewRequest(http.MethodGet, endpoint.String(), nil)
+	req.Header.Set("User-Agent", "NOFX-NewsFetcher/1.0")
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, fmt.Errorf("cryptopanic status %d", resp.StatusCode)
+	}
+
+	var payload struct {
+		Results []struct {
+			Title       string `json:"title"`
+			PublishedAt string `json:"published_at"`
+			URL         string `json:"url"`
+			Currencies  []struct {
+				Code string `json:"code"`
+			} `json:"currencies"`
+			Source struct {
+				Title string `json:"title"`
+			} `json:"source"`
+		} `json:"results"`
+	}
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 2*1024*1024))
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(body, &payload); err != nil {
+		return nil, err
+	}
+
+	result := make([]Item, 0, len(payload.Results))
+	for _, r := range payload.Results {
+		t, ok := parseTime(r.PublishedAt)
+		if !ok || t.Before(since) {
+			continue
+		}
+		syms := make([]string, 0, len(r.Currencies))
+		for _, ccy := range r.Currencies {
+			cc := strings.ToUpper(strings.TrimSpace(ccy.Code))
+			if cc != "" {
+				syms = append(syms, cc)
+			}
+		}
+		if len(syms) == 0 {
+			syms = matchSymbols(r.Title, targets)
+		}
+		if len(syms) == 0 {
+			continue
+		}
+		source := strings.TrimSpace(r.Source.Title)
+		if source == "" {
+			source = "CryptoPanic"
+		}
+		result = append(result, Item{
+			Title:       strings.TrimSpace(r.Title),
+			Link:        strings.TrimSpace(r.URL),
+			Source:      source,
+			PublishedAt: t,
+			Symbols:     syms,
+			Sentiment:   sentimentScore(r.Title),
+		})
+	}
+	return result, nil
+}
+
 func parseTime(v string) (time.Time, bool) {
 	layouts := []string{time.RFC1123Z, time.RFC1123, time.RFC3339, time.RFC822Z, time.RFC822}
 	v = strings.TrimSpace(v)
