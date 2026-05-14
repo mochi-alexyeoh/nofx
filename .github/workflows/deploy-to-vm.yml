@@ -19,4 +19,4 @@ jobs:
           chmod +x .github/workflows/scripts/deployment_vm.sh
           ./.github/workflows/scripts/deployment_vm.sh
         env:
-          PROJECT_PATH: ${{ github.workspace }}
+          PROJECT_PATH: ${{ vars.VM_PROJECT_PATH }}
