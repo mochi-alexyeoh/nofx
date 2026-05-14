@@ -46,6 +46,12 @@ func NewDataFeed(cfg BacktestConfig) (*DataFeed, error) {
 }
 
 func (df *DataFeed) loadAll() error {
+	if len(df.symbols) == 0 {
+		return fmt.Errorf("no symbols configured for backtest datafeed")
+	}
+	if len(df.timeframes) == 0 {
+		return fmt.Errorf("no timeframes configured for backtest datafeed")
+	}
 	start := time.Unix(df.cfg.StartTS, 0)
 	end := time.Unix(df.cfg.EndTS, 0)
 
@@ -95,7 +101,14 @@ func (df *DataFeed) loadAll() error {
 
 	// Generate backtest progress timeline using the primary timeframe of the first symbol
 	firstSymbol := df.symbols[0]
-	primarySeries := df.symbolSeries[firstSymbol].byTF[df.primaryTF]
+	firstSeries, ok := df.symbolSeries[firstSymbol]
+	if !ok || firstSeries == nil {
+		return fmt.Errorf("missing data series for first symbol %s", firstSymbol)
+	}
+	primarySeries, ok := firstSeries.byTF[df.primaryTF]
+	if !ok || primarySeries == nil || len(primarySeries.closeTimes) == 0 {
+		return fmt.Errorf("primary timeframe %s has no data for %s", df.primaryTF, firstSymbol)
+	}
 	startMs := start.UnixMilli()
 	endMs := end.UnixMilli()
 	for _, ts := range primarySeries.closeTimes {
