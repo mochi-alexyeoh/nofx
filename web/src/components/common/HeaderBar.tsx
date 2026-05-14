@@ -177,7 +177,7 @@ export default function HeaderBar({
                   {
                     page: 'backtest',
                     path: ROUTES.backtest,
-                    label: 'Backtest',
+                    label: language === 'zh' ? '回测' : language === 'id' ? 'Backtest' : 'Backtest',
                     requiresAuth: true,
                   },
                   {
@@ -501,7 +501,7 @@ export default function HeaderBar({
                   {
                     page: 'backtest',
                     path: ROUTES.backtest,
-                    label: 'Backtest',
+                    label: language === 'zh' ? '回测' : language === 'id' ? 'Backtest' : 'Backtest',
                     requiresAuth: true,
                   },
                   {
