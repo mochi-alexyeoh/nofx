@@ -153,7 +153,7 @@ export default function HeaderBar({
                         ? '策略市场'
                         : language === 'id'
                           ? 'Pasar'
-                          : 'Marketz',
+                          : 'Market',
                     requiresAuth: true,
                   },
                   {
@@ -606,8 +606,8 @@ export default function HeaderBar({
                       setMobileMenuOpen(false)
                     }}
                     className={`flex-1 py-3 text-sm font-bold rounded-md transition-colors ${language === lang
-                        ? 'bg-zinc-800 text-white shadow-sm'
-                        : 'text-zinc-500'
+                      ? 'bg-zinc-800 text-white shadow-sm'
+                      : 'text-zinc-500'
                       }`}
                   >
                     {lang === 'zh' ? 'CN' : lang === 'id' ? 'ID' : 'EN'}
