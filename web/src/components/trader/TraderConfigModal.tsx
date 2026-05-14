@@ -9,6 +9,10 @@ import { NofxSelect } from '../ui/select'
 
 // 提取下划线后面的名称部分
 function getShortName(fullName: string): string {
+  const normalized = (fullName || '').trim().toLowerCase()
+  if (normalized.includes('claw402')) {
+    return 'x402 AI'
+  }
   const parts = fullName.split('_')
   return parts.length > 1 ? parts[parts.length - 1] : fullName
 }

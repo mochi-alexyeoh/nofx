@@ -292,7 +292,7 @@ export const chartTabs = {
 // HELPER FUNCTION
 // ============================================================================
 
-export function ts(entry: { zh: string; en: string; [k: string]: string }, lang: string): string {
+export function ts(entry: { zh: string; en: string;[k: string]: string }, lang: string): string {
   return entry[lang] ?? entry.en ?? ''
 }
 

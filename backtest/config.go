@@ -47,8 +47,9 @@ type BacktestConfig struct {
 	CacheAI              bool     `json:"cache_ai"`
 	ReplayOnly           bool     `json:"replay_only"`
 
-	AICfg    AIConfig       `json:"ai"`
-	Leverage LeverageConfig `json:"leverage"`
+	AICfg             AIConfig       `json:"ai"`
+	Leverage          LeverageConfig `json:"leverage"`
+	Claw402WalletKey  string         `json:"-"`
 
 	SharedAICachePath         string `json:"ai_cache_path,omitempty"`
 	CheckpointIntervalBars    int    `json:"checkpoint_interval_bars,omitempty"`

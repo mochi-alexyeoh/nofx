@@ -119,7 +119,7 @@ func NewRunner(cfg BacktestConfig, mcpClient mcp.AIClient) (*Runner, error) {
 
 	// Create strategy engine from backtest config for unified prompt generation
 	strategyConfig := cfg.ToStrategyConfig()
-	strategyEngine := kernel.NewStrategyEngine(strategyConfig)
+	strategyEngine := kernel.NewStrategyEngine(strategyConfig, cfg.Claw402WalletKey)
 
 	r := &Runner{
 		cfg:            cfg,

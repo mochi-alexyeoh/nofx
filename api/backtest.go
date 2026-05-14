@@ -859,5 +859,14 @@ func (s *Server) hydrateBacktestAIConfig(cfg *backtest.BacktestConfig) error {
 		}
 	}
 
+	// Backtest should route NofxOS data via claw402 (same as live trader path) when available.
+	walletKey, err := s.store.AIModel().ResolveClaw402WalletKey(cfg.UserID, model.ID)
+	if err != nil {
+		logger.Warnf("⚠️ Backtest failed to resolve claw402 wallet key for user %s: %v", cfg.UserID, err)
+	} else if strings.TrimSpace(walletKey) != "" {
+		cfg.Claw402WalletKey = walletKey
+		logger.Infof("🔗 Backtest will route NofxOS data via claw402 wallet for user %s", cfg.UserID)
+	}
+
 	return nil
 }

@@ -1610,7 +1610,7 @@ export const translations = {
     configureExchanges: '配置交易所',
     aiScanInterval: 'AI 扫描决策间隔 (分钟)',
     scanIntervalRecommend: '建议: 3-10分钟',
-    useTestnet: '使用测试网',
+    useTestnet: '运用测试网',
     enabled: '启用',
     save: '保存',
 

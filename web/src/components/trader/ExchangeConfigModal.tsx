@@ -622,7 +622,7 @@ export function ExchangeConfigModal({
                       <div className="p-4 rounded-xl" style={{ background: 'rgba(240, 185, 11, 0.08)', border: '1px solid rgba(240, 185, 11, 0.2)' }}>
                         <label className="flex items-start justify-between gap-3 cursor-pointer">
                           <div>
-                            <div className="text-sm font-semibold" style={{ color: '#EAECEF' }}>Use Testnet</div>
+                            <div className="text-sm font-semibold" style={{ color: '#EAECEF' }}>{t('useTestnet', language)}</div>
                             <div className="text-xs mt-1" style={{ color: '#848E9C' }}>{t('testnetDescription', language)}</div>
                           </div>
                           <input

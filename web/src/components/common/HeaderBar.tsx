@@ -125,74 +125,74 @@ export default function HeaderBar({
                 badge?: string
                 hidden?: boolean
               }[] = [
-                {
-                  page: 'agent',
-                  path: ROUTES.agent,
-                  label: 'Agent',
-                  requiresAuth: false,
-                  badge: 'Beta',
-                  hidden: true,
-                },
-                {
-                  page: 'data',
-                  path: ROUTES.data,
-                  label:
-                    language === 'zh'
-                      ? '数据'
-                      : language === 'id'
-                        ? 'Data'
-                        : 'Data',
-                  requiresAuth: false,
-                  hidden: true,
-                },
-                {
-                  page: 'strategy-market',
-                  path: ROUTES.strategyMarket,
-                  label:
-                    language === 'zh'
-                      ? '策略市场'
-                      : language === 'id'
-                        ? 'Pasar'
-                        : 'Market',
-                  requiresAuth: true,
-                },
-                {
-                  page: 'traders',
-                  path: ROUTES.traders,
-                  label: t('configNav', language),
-                  requiresAuth: true,
-                },
-                {
-                  page: 'trader',
-                  path: ROUTES.dashboard,
-                  label: t('dashboardNav', language),
-                  requiresAuth: true,
-                },
-                {
-                  page: 'strategy',
-                  path: ROUTES.strategy,
-                  label: t('strategyNav', language),
-                  requiresAuth: true,
-                },
-                {
-                  page: 'backtest',
-                  path: ROUTES.backtest,
-                  label: 'Backtest',
-                  requiresAuth: true,
-                },
-                {
-                  page: 'competition',
-                  path: ROUTES.competition,
-                  label: t('realtimeNav', language),
-                  requiresAuth: true,
-                },
-                {
-                  page: 'faq',
-                  path: ROUTES.faq,
-                  label: t('faqNav', language),
-                  requiresAuth: false,
-                },
-              ]
+                  {
+                    page: 'agent',
+                    path: ROUTES.agent,
+                    label: 'Agent',
+                    requiresAuth: false,
+                    badge: 'Beta',
+                    hidden: true,
+                  },
+                  {
+                    page: 'data',
+                    path: ROUTES.data,
+                    label:
+                      language === 'zh'
+                        ? '数据'
+                        : language === 'id'
+                          ? 'Data'
+                          : 'Data',
+                    requiresAuth: false,
+                    hidden: true,
+                  },
+                  {
+                    page: 'strategy-market',
+                    path: ROUTES.strategyMarket,
+                    label:
+                      language === 'zh'
+                        ? '策略市场'
+                        : language === 'id'
+                          ? 'Pasar'
+                          : 'Market',
+                    requiresAuth: true,
+                  },
+                  {
+                    page: 'traders',
+                    path: ROUTES.traders,
+                    label: t('configNav', language),
+                    requiresAuth: true,
+                  },
+                  {
+                    page: 'trader',
+                    path: ROUTES.dashboard,
+                    label: t('dashboardNav', language),
+                    requiresAuth: true,
+                  },
+                  {
+                    page: 'strategy',
+                    path: ROUTES.strategy,
+                    label: t('strategyNav', language),
+                    requiresAuth: true,
+                  },
+                  {
+                    page: 'backtest',
+                    path: ROUTES.backtest,
+                    label: language === 'zh' ? '回测' : language === 'id' ? 'Backtest' : 'Backtest',
+                    requiresAuth: true,
+                  },
+                  {
+                    page: 'competition',
+                    path: ROUTES.competition,
+                    label: t('realtimeNav', language),
+                    requiresAuth: true,
+                  },
+                  {
+                    page: 'faq',
+                    path: ROUTES.faq,
+                    label: t('faqNav', language),
+                    requiresAuth: false,
+                  },
+                ]
 
               const handleNavClick = (tab: (typeof navTabs)[0]) => {
                 // If requires auth and not logged in, show login prompt
@@ -438,224 +438,223 @@ export default function HeaderBar({
         <div
           className={`relative z-10 flex flex-col h-[calc(100vh-64px)] w-[86vw] max-w-sm overflow-y-auto px-5 py-6 bg-[#0B0E11] border-r border-zinc-800 shadow-2xl transition-transform duration-100 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
         >
-              {/* Navigation Links */}
-              <div className="flex flex-col gap-4 mb-5">
-                {(() => {
-                  const navTabs: {
-                    page: Page
-                    path: string
-                    label: string
-                    requiresAuth: boolean
-                    badge?: string
-                    hidden?: boolean
-                  }[] = [
-                    {
-                      page: 'agent',
-                      path: ROUTES.agent,
-                      label: 'Agent',
-                      requiresAuth: false,
-                      badge: 'Beta',
-                      hidden: true,
-                    },
-                    {
-                      page: 'data',
-                      path: ROUTES.data,
-                      label:
-                        language === 'zh'
-                          ? '数据'
-                          : language === 'id'
-                            ? 'Data'
-                            : 'Data',
-                      requiresAuth: false,
-                      hidden: true,
-                    },
-                    {
-                      page: 'strategy-market',
-                      path: ROUTES.strategyMarket,
-                      label:
-                        language === 'zh'
-                          ? '策略市场'
-                          : language === 'id'
-                            ? 'Pasar'
-                            : 'Market',
-                      requiresAuth: true,
-                    },
-                    {
-                      page: 'traders',
-                      path: ROUTES.traders,
-                      label: t('configNav', language),
-                      requiresAuth: true,
-                    },
-                    {
-                      page: 'trader',
-                      path: ROUTES.dashboard,
-                      label: t('dashboardNav', language),
-                      requiresAuth: true,
-                    },
-                    {
-                      page: 'strategy',
-                      path: ROUTES.strategy,
-                      label: t('strategyNav', language),
-                      requiresAuth: true,
-                    },
-                    {
-                      page: 'backtest',
-                      path: ROUTES.backtest,
-                      label: 'Backtest',
-                      requiresAuth: true,
-                    },
-                    {
-                      page: 'competition',
-                      path: ROUTES.competition,
-                      label: t('realtimeNav', language),
-                      requiresAuth: true,
-                    },
-                    {
-                      page: 'faq',
-                      path: ROUTES.faq,
-                      label: t('faqNav', language),
-                      requiresAuth: false,
-                    },
-                  ]
+          {/* Navigation Links */}
+          <div className="flex flex-col gap-4 mb-5">
+            {(() => {
+              const navTabs: {
+                page: Page
+                path: string
+                label: string
+                requiresAuth: boolean
+                badge?: string
+                hidden?: boolean
+              }[] = [
+                  {
+                    page: 'agent',
+                    path: ROUTES.agent,
+                    label: 'Agent',
+                    requiresAuth: false,
+                    badge: 'Beta',
+                    hidden: true,
+                  },
+                  {
+                    page: 'data',
+                    path: ROUTES.data,
+                    label:
+                      language === 'zh'
+                        ? '数据'
+                        : language === 'id'
+                          ? 'Data'
+                          : 'Data',
+                    requiresAuth: false,
+                    hidden: true,
+                  },
+                  {
+                    page: 'strategy-market',
+                    path: ROUTES.strategyMarket,
+                    label:
+                      language === 'zh'
+                        ? '策略市场'
+                        : language === 'id'
+                          ? 'Pasar'
+                          : 'Market',
+                    requiresAuth: true,
+                  },
+                  {
+                    page: 'traders',
+                    path: ROUTES.traders,
+                    label: t('configNav', language),
+                    requiresAuth: true,
+                  },
+                  {
+                    page: 'trader',
+                    path: ROUTES.dashboard,
+                    label: t('dashboardNav', language),
+                    requiresAuth: true,
+                  },
+                  {
+                    page: 'strategy',
+                    path: ROUTES.strategy,
+                    label: t('strategyNav', language),
+                    requiresAuth: true,
+                  },
+                  {
+                    page: 'backtest',
+                    path: ROUTES.backtest,
+                    label: language === 'zh' ? '回测' : language === 'id' ? 'Backtest' : 'Backtest',
+                    requiresAuth: true,
+                  },
+                  {
+                    page: 'competition',
+                    path: ROUTES.competition,
+                    label: t('realtimeNav', language),
+                    requiresAuth: true,
+                  },
+                  {
+                    page: 'faq',
+                    path: ROUTES.faq,
+                    label: t('faqNav', language),
+                    requiresAuth: false,
+                  },
+                ]
 
-                  const handleMobileNavClick = (tab: (typeof navTabs)[0]) => {
-                    if (tab.requiresAuth && !isLoggedIn) {
-                      onLoginRequired?.(tab.label)
-                      setMobileMenuOpen(false)
-                      return
-                    }
-                    if (onPageChange) {
-                      onPageChange(tab.page)
-                    }
-                    navigateInApp(tab.path)
-                    setMobileMenuOpen(false)
-                  }
+              const handleMobileNavClick = (tab: (typeof navTabs)[0]) => {
+                if (tab.requiresAuth && !isLoggedIn) {
+                  onLoginRequired?.(tab.label)
+                  setMobileMenuOpen(false)
+                  return
+                }
+                if (onPageChange) {
+                  onPageChange(tab.page)
+                }
+                navigateInApp(tab.path)
+                setMobileMenuOpen(false)
+              }
 
-                  return navTabs.filter((tab) => !tab.hidden).map((tab) => (
-                    <button
-                      key={tab.page}
-                      onClick={() => handleMobileNavClick(tab)}
-                      className={`w-full rounded-lg px-3 py-2 text-xl font-extrabold tracking-tight text-left flex items-center gap-3 transition-colors
+              return navTabs.filter((tab) => !tab.hidden).map((tab) => (
+                <button
+                  key={tab.page}
+                  onClick={() => handleMobileNavClick(tab)}
+                  className={`w-full rounded-lg px-3 py-2 text-xl font-extrabold tracking-tight text-left flex items-center gap-3 transition-colors
                         ${resolvedCurrentPage === tab.page ? 'text-nofx-gold bg-nofx-gold/10 border border-nofx-gold/20' : 'text-zinc-200 hover:bg-white/5'}`}
-                    >
-                      {resolvedCurrentPage === tab.page && (
-                        <div className="w-1.5 h-1.5 rounded-full bg-nofx-gold" />
-                      )}
-                      {tab.label}
-                      {tab.badge && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-nofx-gold/20 text-nofx-gold font-semibold uppercase align-middle relative -top-1">
-                          {tab.badge}
-                        </span>
-                      )}
-                      {tab.requiresAuth && !isLoggedIn && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded border border-zinc-800 text-zinc-500 font-normal tracking-wide uppercase align-middle relative -top-1">
-                          LOGIN_REQ
-                        </span>
-                      )}
-                    </button>
-                  ))
-                })()}
+                >
+                  {resolvedCurrentPage === tab.page && (
+                    <div className="w-1.5 h-1.5 rounded-full bg-nofx-gold" />
+                  )}
+                  {tab.label}
+                  {tab.badge && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-nofx-gold/20 text-nofx-gold font-semibold uppercase align-middle relative -top-1">
+                      {tab.badge}
+                    </span>
+                  )}
+                  {tab.requiresAuth && !isLoggedIn && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded border border-zinc-800 text-zinc-500 font-normal tracking-wide uppercase align-middle relative -top-1">
+                      LOGIN_REQ
+                    </span>
+                  )}
+                </button>
+              ))
+            })()}
 
+          </div>
+
+          {/* Bottom Actions */}
+          <div className="mt-6 space-y-5">
+            {/* Social Links */}
+            <div className="flex items-center gap-4">
+              {[
+                {
+                  href: 'https://www.linkedin.com/company/ntglobal-nextech/',
+                  icon: Linkedin,
+                  hover: 'hover:text-[#0A66C2] hover:border-[#0A66C2]'
+                },
+                {
+                  href: 'https://www.facebook.com/NexTechPage',
+                  icon: Facebook,
+                  hover: 'hover:text-[#1877F2] hover:border-[#1877F2]'
+                },
+                {
+                  href: 'https://www.instagram.com/nextechofficial_',
+                  icon: Instagram,
+                  hover: 'hover:text-[#E4405F] hover:border-[#E4405F]'
+                },
+              ].map((link, i) => {
+                const Icon = link.icon
+                return (
+                  <a
+                    key={i}
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 transition-colors ${link.hover}`}
+                  >
+                    <Icon size={20} />
+                  </a>
+                )
+              })}
+            </div>
+
+            {/* Account / Lang */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Lang Switcher */}
+              <div className="flex bg-zinc-900 rounded-lg p-1 border border-zinc-800">
+                {['zh', 'en', 'id'].map((lang) => (
+                  <button
+                    key={lang}
+                    onClick={() => {
+                      onLanguageChange?.(lang as Language)
+                      setMobileMenuOpen(false)
+                    }}
+                    className={`flex-1 py-3 text-sm font-bold rounded-md transition-colors ${language === lang
+                      ? 'bg-zinc-800 text-white shadow-sm'
+                      : 'text-zinc-500'
+                      }`}
+                  >
+                    {lang === 'zh' ? 'CN' : lang === 'id' ? 'ID' : 'EN'}
+                  </button>
+                ))}
               </div>
 
-              {/* Bottom Actions */}
-              <div className="mt-6 space-y-5">
-                {/* Social Links */}
-                <div className="flex items-center gap-4">
-                  {[
-                    {
-                      href: 'https://www.linkedin.com/company/ntglobal-nextech/',
-                      icon: Linkedin,
-                      hover: 'hover:text-[#0A66C2] hover:border-[#0A66C2]'
-                    },
-                    {
-                      href: 'https://www.facebook.com/NexTechPage',
-                      icon: Facebook,
-                      hover: 'hover:text-[#1877F2] hover:border-[#1877F2]'
-                    },
-                    {
-                      href: 'https://www.instagram.com/nextechofficial_',
-                      icon: Instagram,
-                      hover: 'hover:text-[#E4405F] hover:border-[#E4405F]'
-                    },
-                  ].map((link, i) => {
-                    const Icon = link.icon
-                    return (
-                      <a
-                        key={i}
-                        href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 transition-colors ${link.hover}`}
-                      >
-                        <Icon size={20} />
-                      </a>
-                    )
-                  })}
-                </div>
-
-                {/* Account / Lang */}
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Lang Switcher */}
-                  <div className="flex bg-zinc-900 rounded-lg p-1 border border-zinc-800">
-                    {['zh', 'en', 'id'].map((lang) => (
-                      <button
-                        key={lang}
-                        onClick={() => {
-                          onLanguageChange?.(lang as Language)
-                          setMobileMenuOpen(false)
-                        }}
-                        className={`flex-1 py-3 text-sm font-bold rounded-md transition-colors ${
-                          language === lang
-                            ? 'bg-zinc-800 text-white shadow-sm'
-                            : 'text-zinc-500'
-                        }`}
-                      >
-                        {lang === 'zh' ? 'CN' : lang === 'id' ? 'ID' : 'EN'}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Auth Actions */}
-                  {isLoggedIn && user ? (
+              {/* Auth Actions */}
+              {isLoggedIn && user ? (
+                <button
+                  onClick={() => {
+                    onLogout?.()
+                    setMobileMenuOpen(false)
+                  }}
+                  className="bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg font-bold text-sm hover:bg-red-500/20 transition-colors"
+                >
+                  {t('exitLogin', language)}
+                </button>
+              ) : (
+                resolvedCurrentPage !== 'login' &&
+                resolvedCurrentPage !== 'register' && (
+                  <div className="grid grid-cols-2 gap-2">
                     <button
+                      type="button"
                       onClick={() => {
-                        onLogout?.()
+                        navigateInApp(ROUTES.login)
                         setMobileMenuOpen(false)
                       }}
-                      className="bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg font-bold text-sm hover:bg-red-500/20 transition-colors"
+                      className="flex items-center justify-center bg-nofx-gold text-black rounded-lg font-bold text-sm hover:bg-yellow-400 transition-colors"
                     >
-                      {t('exitLogin', language)}
+                      {t('signIn', language)}
                     </button>
-                  ) : (
-                    resolvedCurrentPage !== 'login' &&
-                    resolvedCurrentPage !== 'register' && (
-                      <div className="grid grid-cols-2 gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            navigateInApp(ROUTES.login)
-                            setMobileMenuOpen(false)
-                          }}
-                          className="flex items-center justify-center bg-nofx-gold text-black rounded-lg font-bold text-sm hover:bg-yellow-400 transition-colors"
-                        >
-                          {t('signIn', language)}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            navigateInApp(ROUTES.register)
-                            setMobileMenuOpen(false)
-                          }}
-                          className="flex items-center justify-center border border-zinc-700 text-zinc-200 rounded-lg font-bold text-sm hover:bg-zinc-800 transition-colors"
-                        >
-                          {t('signUp', language) || 'Sign Up'}
-                        </button>
-                      </div>
-                    )
-                  )}
-                </div>
-              </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigateInApp(ROUTES.register)
+                        setMobileMenuOpen(false)
+                      }}
+                      className="flex items-center justify-center border border-zinc-700 text-zinc-200 rounded-lg font-bold text-sm hover:bg-zinc-800 transition-colors"
+                    >
+                      {t('signUp', language) || 'Sign Up'}
+                    </button>
+                  </div>
+                )
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </nav>
