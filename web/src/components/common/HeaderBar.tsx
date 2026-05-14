@@ -449,74 +449,74 @@ export default function HeaderBar({
                 badge?: string
                 hidden?: boolean
               }[] = [
-                  {
-                    page: 'agent',
-                    path: ROUTES.agent,
-                    label: 'Agent',
-                    requiresAuth: false,
-                    badge: 'Beta',
-                    hidden: true,
-                  },
-                  {
-                    page: 'data',
-                    path: ROUTES.data,
-                    label:
-                      language === 'zh'
-                        ? '数据'
-                        : language === 'id'
-                          ? 'Data'
-                          : 'Data',
-                    requiresAuth: false,
-                    hidden: true,
-                  },
-                  {
-                    page: 'strategy-market',
-                    path: ROUTES.strategyMarket,
-                    label:
-                      language === 'zh'
-                        ? '策略市场'
-                        : language === 'id'
-                          ? 'Pasar'
-                          : 'Market',
-                    requiresAuth: true,
-                  },
-                  {
-                    page: 'traders',
-                    path: ROUTES.traders,
-                    label: t('configNav', language),
-                    requiresAuth: true,
-                  },
-                  {
-                    page: 'trader',
-                    path: ROUTES.dashboard,
-                    label: t('dashboardNav', language),
-                    requiresAuth: true,
-                  },
-                  {
-                    page: 'strategy',
-                    path: ROUTES.strategy,
-                    label: t('strategyNav', language),
-                    requiresAuth: true,
-                  },
-                  {
-                    page: 'backtest',
-                    path: ROUTES.backtest,
-                    label: language === 'zh' ? '回测' : language === 'id' ? 'Backtest' : 'Backtest',
-                    requiresAuth: true,
-                  },
-                  {
-                    page: 'competition',
-                    path: ROUTES.competition,
-                    label: t('realtimeNav', language),
-                    requiresAuth: true,
-                  },
-                  {
-                    page: 'faq',
-                    path: ROUTES.faq,
-                    label: t('faqNav', language),
-                    requiresAuth: false,
-                  },
-                ]
+                {
+                  page: 'agent',
+                  path: ROUTES.agent,
+                  label: 'Agent',
+                  requiresAuth: false,
+                  badge: 'Beta',
+                  hidden: true,
+                },
+                {
+                  page: 'data',
+                  path: ROUTES.data,
+                  label:
+                    language === 'zh'
+                      ? '数据'
+                      : language === 'id'
+                        ? 'Data'
+                        : 'Data',
+                  requiresAuth: false,
+                  hidden: true,
+                },
+                {
+                  page: 'strategy-market',
+                  path: ROUTES.strategyMarket,
+                  label:
+                    language === 'zh'
+                      ? '策略市场'
+                      : language === 'id'
+                        ? 'Pasar'
+                        : 'Market',
+                  requiresAuth: true,
+                },
+                {
+                  page: 'traders',
+                  path: ROUTES.traders,
+                  label: t('configNav', language),
+                  requiresAuth: true,
+                },
+                {
+                  page: 'trader',
+                  path: ROUTES.dashboard,
+                  label: t('dashboardNav', language),
+                  requiresAuth: true,
+                },
+                {
+                  page: 'strategy',
+                  path: ROUTES.strategy,
+                  label: t('strategyNav', language),
+                  requiresAuth: true,
+                },
+                {
+                  page: 'backtest',
+                  path: ROUTES.backtest,
+                  label: language === 'zh' ? '回测' : language === 'id' ? 'Backtest' : 'Backtest',
+                  requiresAuth: true,
+                },
+                {
+                  page: 'competition',
+                  path: ROUTES.competition,
+                  label: t('realtimeNav', language),
+                  requiresAuth: true,
+                },
+                {
+                  page: 'faq',
+                  path: ROUTES.faq,
+                  label: t('faqNav', language),
+                  requiresAuth: false,
+                },
+              ]
 
               const handleMobileNavClick = (tab: (typeof navTabs)[0]) => {
                 if (tab.requiresAuth && !isLoggedIn) {

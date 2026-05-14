@@ -660,7 +660,7 @@ export function StrategyStudioPage() {
       icon: Settings,
       color: '#60a5fa',
       title: tr('customPrompt'),
-      forStrategyType: 'ai_trading' as const,
+      forStrategyType: 'both' as const,
       content: editingConfig && (
         <div>
           <p className="text-xs mb-2" style={{ color: '#848E9C' }}>

@@ -454,11 +454,14 @@ func buildGridUserPromptEn(ctx *GridContext) string {
 // ============================================================================
 
 // GetGridDecisions gets AI decisions for grid trading
-func GetGridDecisions(ctx *GridContext, mcpClient mcp.AIClient, config *store.GridStrategyConfig, lang string) (*FullDecision, error) {
+func GetGridDecisions(ctx *GridContext, mcpClient mcp.AIClient, config *store.GridStrategyConfig, lang string, customPrompt string) (*FullDecision, error) {
 	startTime := time.Now()
 
 	// Build prompts
 	systemPrompt := BuildGridSystemPrompt(config, lang)
+	if strings.TrimSpace(customPrompt) != "" {
+		systemPrompt += "\n\n## Additional User Custom Prompt\n" + customPrompt
+	}
 	userPrompt := BuildGridUserPrompt(ctx, lang)
 
 	logger.Infof("🤖 [Grid] Calling AI for grid decisions...")
