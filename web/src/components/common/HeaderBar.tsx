@@ -134,17 +134,7 @@ export default function HeaderBar({
                     hidden: true,
                   },
                   {
-                    page: 'data',
-                    path: ROUTES.data,
-                    label:
-                      language === 'zh'
-                        ? '数据'
-                        : language === 'id'
-                          ? 'Data'
-                          : 'Data',
-                    requiresAuth: false,
-                    hidden: true,
-                  },
+                                      },
                   {
                     page: 'strategy-market',
                     path: ROUTES.strategyMarket,
@@ -458,17 +448,7 @@ export default function HeaderBar({
                     hidden: true,
                   },
                   {
-                    page: 'data',
-                    path: ROUTES.data,
-                    label:
-                      language === 'zh'
-                        ? '数据'
-                        : language === 'id'
-                          ? 'Data'
-                          : 'Data',
-                    requiresAuth: false,
-                    hidden: true,
-                  },
+                                      },
                   {
                     page: 'strategy-market',
                     path: ROUTES.strategyMarket,
