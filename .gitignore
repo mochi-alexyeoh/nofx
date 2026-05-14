@@ -64,6 +64,8 @@ secrets/
 *.p12
 *.pfx
 rsa_key*
+nginx/certs/
+nginx/www/
 
 # 加密相关
 DATA_ENCRYPTION_KEY=*
