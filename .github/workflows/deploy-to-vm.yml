@@ -8,19 +8,15 @@ on:
 jobs:
   deploy:
     name: "Deploy to Production (VM)"
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
     environment: Production (VM)
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Deploy to Server
-        uses: appleboy/ssh-action@v1
+        run: |
+          chmod +x .github/workflows/scripts/deployment_vm.sh
+          ./.github/workflows/scripts/deployment_vm.sh
         env:
-          PROJECT_PATH: ${{ vars.VM_PROJECT_PATH }}
-        with:
-          host: ${{ secrets.VM_PRODUCTION_SERVER_HOST }}
-          username: ${{ secrets.VM_PRODUCTION_SERVER_USERNAME }}
-          key: ${{ secrets.VM_PRODUCTION_SERVER_SSH_KEY }}
-          envs: PROJECT_PATH
-          script_path: .github/workflows/scripts/deployment_vm.sh
+          PROJECT_PATH: ${{ github.workspace }}
