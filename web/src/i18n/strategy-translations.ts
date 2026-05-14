@@ -111,7 +111,7 @@ export const gridRisk = {
   leverageInfo: { zh: '杠杆', en: 'Leverage', es: 'Apalancamiento' },
   positionInfo: { zh: '仓位', en: 'Position', es: 'Posición' },
   liquidationInfo: { zh: '清算', en: 'Liquidation', es: 'Liquidación' },
-  marketState: { zh: '市场', en: 'Market', es: 'Mercado' },
+  marketState: { zh: '市场', en: 'Marketz', es: 'Mercado' },
   boxState: { zh: '箱体', en: 'Box', es: 'Caja' },
   currentLeverage: { zh: '当前', en: 'Current', es: 'Actual' },
   effectiveLeverage: { zh: '有效', en: 'Effective', es: 'Efectivo' },
@@ -292,7 +292,7 @@ export const chartTabs = {
 // HELPER FUNCTION
 // ============================================================================
 
-export function ts(entry: { zh: string; en: string; [k: string]: string }, lang: string): string {
+export function ts(entry: { zh: string; en: string;[k: string]: string }, lang: string): string {
   return entry[lang] ?? entry.en ?? ''
 }
 
