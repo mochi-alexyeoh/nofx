@@ -111,7 +111,7 @@ export const gridRisk = {
   leverageInfo: { zh: '杠杆', en: 'Leverage', es: 'Apalancamiento' },
   positionInfo: { zh: '仓位', en: 'Position', es: 'Posición' },
   liquidationInfo: { zh: '清算', en: 'Liquidation', es: 'Liquidación' },
-  marketState: { zh: '市场', en: 'Marketz', es: 'Mercado' },
+  marketState: { zh: '市场', en: 'Market', es: 'Mercado' },
   boxState: { zh: '箱体', en: 'Box', es: 'Caja' },
   currentLeverage: { zh: '当前', en: 'Current', es: 'Actual' },
   effectiveLeverage: { zh: '有效', en: 'Effective', es: 'Efectivo' },
