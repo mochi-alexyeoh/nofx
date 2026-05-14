@@ -13,9 +13,9 @@ import (
 	"time"
 
 	"nofx/backtest"
+	"nofx/kernel"
 	"nofx/logger"
 	"nofx/market"
-	"nofx/provider/nofxos"
 	"nofx/store"
 
 	"github.com/gin-gonic/gin"
@@ -74,6 +74,12 @@ func (s *Server) handleBacktestStart(c *gin.Context) {
 	logger.Infof("📊 Backtest request - symbols from request: %v (count=%d), strategyID: %s",
 		cfg.Symbols, len(cfg.Symbols), cfg.StrategyID)
 
+	// Hydrate AI config first so claw402 wallet routing is available for dynamic coin source resolution.
+	if err := s.hydrateBacktestAIConfig(&cfg); err != nil {
+		SafeBadRequest(c, "Failed to configure AI model")
+		return
+	}
+
 	// Load strategy config if strategy_id is provided
 	if cfg.StrategyID != "" {
 		strategy, err := s.store.Strategy().Get(cfg.UserID, cfg.StrategyID)
@@ -100,7 +106,7 @@ func (s *Server) handleBacktestStart(c *gin.Context) {
 
 		// If no symbols provided, fetch from strategy's coin source
 		if len(cfg.Symbols) == 0 {
-			symbols, err := s.resolveStrategyCoins(&strategyConfig)
+			symbols, err := s.resolveStrategyCoins(&strategyConfig, cfg.Claw402WalletKey)
 			if err != nil {
 				SafeBadRequest(c, "Failed to resolve coins from strategy")
 				return
@@ -108,11 +114,6 @@ func (s *Server) handleBacktestStart(c *gin.Context) {
 			cfg.Symbols = symbols
 			logger.Infof("📊 Resolved %d coins from strategy: %v", len(symbols), symbols)
 		}
-	}
-
-	if err := s.hydrateBacktestAIConfig(&cfg); err != nil {
-		SafeBadRequest(c, "Failed to configure AI model")
-		return
 	}
 
 	logger.Infof("📊 Starting backtest with final config: runID=%s, symbols=%v (count=%d), strategyID=%s",
@@ -629,136 +630,26 @@ func writeBacktestAccessError(c *gin.Context, err error) bool {
 }
 
 // resolveStrategyCoins fetches coins based on strategy's coin source configuration
-func (s *Server) resolveStrategyCoins(strategyConfig *store.StrategyConfig) ([]string, error) {
+func (s *Server) resolveStrategyCoins(strategyConfig *store.StrategyConfig, claw402WalletKey string) ([]string, error) {
 	if strategyConfig == nil {
 		return nil, fmt.Errorf("strategy config is nil")
 	}
 
-	coinSource := strategyConfig.CoinSource
-	var symbols []string
-	symbolSet := make(map[string]bool)
-
-	// Handle empty source_type - check flags for backward compatibility
-	sourceType := coinSource.SourceType
-	if sourceType == "" {
-		if coinSource.UseAI500 && coinSource.UseOITop {
-			sourceType = "mixed"
-		} else if coinSource.UseAI500 {
-			sourceType = "ai500"
-		} else if coinSource.UseOITop {
-			sourceType = "oi_top"
-		} else if len(coinSource.StaticCoins) > 0 {
-			sourceType = "static"
-		} else {
-			return nil, fmt.Errorf("strategy has no coin source configured")
-		}
-		logger.Infof("📊 Inferred source_type=%s from flags", sourceType)
+	engine := kernel.NewStrategyEngine(strategyConfig, claw402WalletKey)
+	candidates, err := engine.GetCandidateCoins()
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve strategy coin source: %w", err)
 	}
 
-	switch sourceType {
-	case "static":
-		for _, sym := range coinSource.StaticCoins {
-			sym = market.Normalize(sym)
-			if !symbolSet[sym] {
-				symbols = append(symbols, sym)
-				symbolSet[sym] = true
-			}
+	symbols := make([]string, 0, len(candidates))
+	symbolSet := make(map[string]bool)
+	for _, c := range candidates {
+		sym := market.Normalize(c.Symbol)
+		if sym == "" || symbolSet[sym] {
+			continue
 		}
-
-	case "ai500":
-		limit := coinSource.AI500Limit
-		if limit <= 0 {
-			limit = 30
-		}
-		logger.Infof("📊 Fetching AI500 coins with limit=%d", limit)
-		coins, err := nofxos.DefaultClient().GetTopRatedCoins(limit)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get AI500 coins: %w", err)
-		}
-		logger.Infof("📊 Got %d coins from AI500: %v", len(coins), coins)
-		for _, sym := range coins {
-			sym = market.Normalize(sym)
-			if !symbolSet[sym] {
-				symbols = append(symbols, sym)
-				symbolSet[sym] = true
-			}
-		}
-
-	case "oi_top":
-		coins, err := nofxos.DefaultClient().GetOITopSymbols()
-		if err != nil {
-			return nil, fmt.Errorf("failed to get OI Top coins: %w", err)
-		}
-		limit := coinSource.OITopLimit
-		if limit <= 0 || limit > len(coins) {
-			limit = len(coins)
-		}
-		for i, sym := range coins {
-			if i >= limit {
-				break
-			}
-			sym = market.Normalize(sym)
-			if !symbolSet[sym] {
-				symbols = append(symbols, sym)
-				symbolSet[sym] = true
-			}
-		}
-
-	case "mixed":
-		// Get from AI500
-		if coinSource.UseAI500 {
-			limit := coinSource.AI500Limit
-			if limit <= 0 {
-				limit = 30
-			}
-			coins, err := nofxos.DefaultClient().GetTopRatedCoins(limit)
-			if err != nil {
-				logger.Warnf("Failed to get AI500 coins: %v", err)
-			} else {
-				for _, sym := range coins {
-					sym = market.Normalize(sym)
-					if !symbolSet[sym] {
-						symbols = append(symbols, sym)
-						symbolSet[sym] = true
-					}
-				}
-			}
-		}
-
-		// Get from OI Top
-		if coinSource.UseOITop {
-			coins, err := nofxos.DefaultClient().GetOITopSymbols()
-			if err != nil {
-				logger.Warnf("Failed to get OI Top coins: %v", err)
-			} else {
-				limit := coinSource.OITopLimit
-				if limit <= 0 || limit > len(coins) {
-					limit = len(coins)
-				}
-				for i, sym := range coins {
-					if i >= limit {
-						break
-					}
-					sym = market.Normalize(sym)
-					if !symbolSet[sym] {
-						symbols = append(symbols, sym)
-						symbolSet[sym] = true
-					}
-				}
-			}
-		}
-
-		// Add static coins
-		for _, sym := range coinSource.StaticCoins {
-			sym = market.Normalize(sym)
-			if !symbolSet[sym] {
-				symbols = append(symbols, sym)
-				symbolSet[sym] = true
-			}
-		}
-
-	default:
-		return nil, fmt.Errorf("unknown coin source type: %s", sourceType)
+		symbolSet[sym] = true
+		symbols = append(symbols, sym)
 	}
 
 	if len(symbols) == 0 {
