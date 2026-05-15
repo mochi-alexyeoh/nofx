@@ -63,7 +63,11 @@ RUN npm run build
 # ──────────────────────────────────────────────────────────────
 FROM alpine:${ALPINE_VERSION}
 
-RUN apk add --no-cache ca-certificates tzdata sqlite nginx openssl gettext
+# apk index/network on CI can be flaky; retry once with explicit update before install
+RUN set -eux; \
+    apk update; \
+    apk add --no-cache ca-certificates tzdata sqlite nginx openssl gettext || \
+    (sleep 2 && apk update && apk add --no-cache ca-certificates tzdata sqlite nginx openssl gettext)
 
 # Backend binary + TA-Lib runtime
 COPY --from=backend-builder /app/nofx /app/nofx
