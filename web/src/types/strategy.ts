@@ -149,6 +149,11 @@ export interface IndicatorConfig {
   news_max_items?: number;
   enable_cryptopanic_news?: boolean;
   cryptopanic_api_key?: string;
+  enable_alpha_vantage_news?: boolean;
+  alpha_vantage_api_key?: string;
+  use_alpha_vantage_news_sentiment?: boolean;
+  alpha_vantage_ticker_scope?: 'auto' | 'manual';
+  alpha_vantage_manual_tickers?: string;
 }
 
 export interface KlineConfig {

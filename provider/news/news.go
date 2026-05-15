@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -28,15 +29,25 @@ type Item struct {
 }
 
 type Config struct {
-	EnableCryptoPanic bool
-	CryptoPanicAPIKey string
+	EnableCryptoPanic       bool
+	CryptoPanicAPIKey       string
+	EnableAlphaVantage      bool
+	AlphaVantageAPIKey      string
+	UseAlphaVantageSentiment bool
+	TickerScope             string // "auto" | "manual"
+	ManualTickers           string // comma-separated
 }
 
 type Client struct {
-	httpClient        *http.Client
-	feeds             []string
-	enableCryptoPanic bool
-	cryptoPanicAPIKey string
+	httpClient               *http.Client
+	feeds                    []string
+	enableCryptoPanic        bool
+	cryptoPanicAPIKey        string
+	enableAlphaVantage       bool
+	alphaVantageAPIKey       string
+	useAlphaVantageSentiment bool
+	tickerScope              string
+	manualTickers            string
 }
 
 func NewClient() *Client {
@@ -45,10 +56,15 @@ func NewClient() *Client {
 
 func NewClientWithConfig(cfg Config) *Client {
 	return &Client{
-		httpClient:        &http.Client{Timeout: 8 * time.Second},
-		feeds:             defaultFeeds,
-		enableCryptoPanic: cfg.EnableCryptoPanic,
-		cryptoPanicAPIKey: strings.TrimSpace(cfg.CryptoPanicAPIKey),
+		httpClient:               &http.Client{Timeout: 8 * time.Second},
+		feeds:                    defaultFeeds,
+		enableCryptoPanic:        cfg.EnableCryptoPanic,
+		cryptoPanicAPIKey:        strings.TrimSpace(cfg.CryptoPanicAPIKey),
+		enableAlphaVantage:       cfg.EnableAlphaVantage,
+		alphaVantageAPIKey:       strings.TrimSpace(cfg.AlphaVantageAPIKey),
+		useAlphaVantageSentiment: cfg.UseAlphaVantageSentiment,
+		tickerScope:              strings.ToLower(strings.TrimSpace(cfg.TickerScope)),
+		manualTickers:            strings.TrimSpace(cfg.ManualTickers),
 	}
 }
 
@@ -61,7 +77,7 @@ func (c *Client) Fetch(symbols []string, lookbackHours int, maxItems int) ([]Ite
 	}
 
 	since := time.Now().Add(-time.Duration(lookbackHours) * time.Hour)
-	targets := normalizeTargets(symbols)
+	targets := c.resolveTargets(symbols)
 
 	items := make([]Item, 0, maxItems)
 	seen := make(map[string]bool)
@@ -85,6 +101,20 @@ func (c *Client) Fetch(symbols []string, lookbackHours int, maxItems int) ([]Ite
 		cpItems, err := c.fetchCryptoPanic(targets, since)
 		if err == nil {
 			for _, it := range cpItems {
+				key := strings.ToLower(strings.TrimSpace(it.Title))
+				if key == "" || seen[key] {
+					continue
+				}
+				seen[key] = true
+				items = append(items, it)
+			}
+		}
+	}
+
+	if c.enableAlphaVantage && c.alphaVantageAPIKey != "" {
+		avItems, err := c.fetchAlphaVantage(targets, since)
+		if err == nil {
+			for _, it := range avItems {
 				key := strings.ToLower(strings.TrimSpace(it.Title))
 				if key == "" || seen[key] {
 					continue
@@ -268,6 +298,146 @@ func (c *Client) fetchCryptoPanic(targets map[string]bool, since time.Time) ([]I
 		})
 	}
 	return result, nil
+}
+
+func (c *Client) resolveTargets(symbols []string) map[string]bool {
+	if c.tickerScope == "manual" && strings.TrimSpace(c.manualTickers) != "" {
+		parts := strings.Split(c.manualTickers, ",")
+		manual := make([]string, 0, len(parts))
+		for _, p := range parts {
+			p = strings.TrimSpace(p)
+			if p != "" {
+				manual = append(manual, p)
+			}
+		}
+		if len(manual) > 0 {
+			return normalizeTargets(manual)
+		}
+	}
+	return normalizeTargets(symbols)
+}
+
+func (c *Client) fetchAlphaVantage(targets map[string]bool, since time.Time) ([]Item, error) {
+	endpoint, _ := url.Parse("https://www.alphavantage.co/query")
+	q := endpoint.Query()
+	q.Set("function", "NEWS_SENTIMENT")
+	q.Set("apikey", c.alphaVantageAPIKey)
+	if len(targets) > 0 {
+		tickers := make([]string, 0, len(targets))
+		for t := range targets {
+			// avoid alias words for AV ticker query
+			if t == "BITCOIN" || t == "ETHEREUM" || t == "SOLANA" || t == "RIPPLE" {
+				continue
+			}
+			tickers = append(tickers, t)
+		}
+		sort.Strings(tickers)
+		if len(tickers) > 0 {
+			q.Set("tickers", strings.Join(tickers, ","))
+		}
+	}
+	endpoint.RawQuery = q.Encode()
+
+	req, _ := http.NewRequest(http.MethodGet, endpoint.String(), nil)
+	req.Header.Set("User-Agent", "NOFX-NewsFetcher/1.0")
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, fmt.Errorf("alphavantage status %d", resp.StatusCode)
+	}
+
+	var payload struct {
+		Feed []struct {
+			Title                 string `json:"title"`
+			URL                   string `json:"url"`
+			Source                string `json:"source"`
+			TimePublished         string `json:"time_published"`
+			OverallSentimentScore string `json:"overall_sentiment_score"`
+			TickerSentiment       []struct {
+				Ticker         string `json:"ticker"`
+				RelevanceScore string `json:"relevance_score"`
+			} `json:"ticker_sentiment"`
+		} `json:"feed"`
+	}
+
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 3*1024*1024))
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(body, &payload); err != nil {
+		return nil, err
+	}
+
+	result := make([]Item, 0, len(payload.Feed))
+	for _, it := range payload.Feed {
+		t, ok := parseAVTime(it.TimePublished)
+		if !ok || t.Before(since) {
+			continue
+		}
+		title := strings.TrimSpace(it.Title)
+		if title == "" {
+			continue
+		}
+
+		syms := make([]string, 0, len(it.TickerSentiment))
+		for _, ts := range it.TickerSentiment {
+			tk := strings.ToUpper(strings.TrimSpace(ts.Ticker))
+			if tk != "" {
+				syms = append(syms, tk)
+			}
+		}
+		if len(syms) == 0 {
+			syms = matchSymbols(title, targets)
+		}
+		if len(syms) == 0 && !isRelevantHeadline(title) {
+			continue
+		}
+
+		sent := sentimentScore(title)
+		if c.useAlphaVantageSentiment {
+			if v, err := strconv.ParseFloat(strings.TrimSpace(it.OverallSentimentScore), 64); err == nil {
+				// AV score often already in [-1,1], clamp just in case
+				if v > 1 {
+					v = 1
+				} else if v < -1 {
+					v = -1
+				}
+				sent = v
+			}
+		}
+
+		source := strings.TrimSpace(it.Source)
+		if source == "" {
+			source = "Alpha Vantage"
+		}
+		result = append(result, Item{
+			Title:       title,
+			Link:        strings.TrimSpace(it.URL),
+			Source:      source,
+			PublishedAt: t,
+			Symbols:     syms,
+			Sentiment:   sent,
+		})
+	}
+
+	return result, nil
+}
+
+func parseAVTime(v string) (time.Time, bool) {
+	v = strings.TrimSpace(v)
+	if v == "" {
+		return time.Time{}, false
+	}
+	layouts := []string{"20060102T150405", "20060102T1504", "20060102T150405Z"}
+	for _, l := range layouts {
+		if t, err := time.Parse(l, v); err == nil {
+			return t.UTC(), true
+		}
+	}
+	return parseTime(v)
 }
 
 func parseTime(v string) (time.Time, bool) {

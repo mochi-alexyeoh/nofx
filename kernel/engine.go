@@ -858,8 +858,13 @@ func (e *StrategyEngine) FetchNewsData(symbols []string) []NewsItem {
 	}
 
 	client := news.NewClientWithConfig(news.Config{
-		EnableCryptoPanic: indicators.EnableCryptoPanicNews,
-		CryptoPanicAPIKey: indicators.CryptoPanicAPIKey,
+		EnableCryptoPanic:        indicators.EnableCryptoPanicNews,
+		CryptoPanicAPIKey:        indicators.CryptoPanicAPIKey,
+		EnableAlphaVantage:       indicators.EnableAlphaVantageNews,
+		AlphaVantageAPIKey:       indicators.AlphaVantageAPIKey,
+		UseAlphaVantageSentiment: indicators.UseAlphaVantageNewsSentiment,
+		TickerScope:              indicators.AlphaVantageTickerScope,
+		ManualTickers:            indicators.AlphaVantageManualTickers,
 	})
 	items, err := client.Fetch(symbols, lookback, maxItems)
 	if err != nil {

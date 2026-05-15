@@ -477,6 +477,69 @@ AI Data Sources
                         style={{ background: '#1E2329', border: '1px solid #2B3139', color: '#EAECEF' }}
                       />
                     )}
+
+                    <label className="flex items-center justify-between text-[10px]" style={{ color: '#EAECEF' }}>
+                      <span>{ts(indicator.useAlphaVantage, language)}</span>
+                      <input
+                        type="checkbox"
+                        checked={config.enable_alpha_vantage_news || false}
+                        onChange={(e) => !disabled && onChange({ ...config, enable_alpha_vantage_news: e.target.checked })}
+                        disabled={disabled}
+                        className="w-3.5 h-3.5 rounded accent-blue-500"
+                      />
+                    </label>
+
+                    {config.enable_alpha_vantage_news && (
+                      <div className="space-y-2">
+                        <input
+                          type="password"
+                          value={config.alpha_vantage_api_key || ''}
+                          onChange={(e) => !disabled && onChange({ ...config, alpha_vantage_api_key: e.target.value })}
+                          placeholder={ts(indicator.alphaVantageApiKey, language)}
+                          disabled={disabled}
+                          className="w-full px-2 py-1.5 rounded text-[10px]"
+                          style={{ background: '#1E2329', border: '1px solid #2B3139', color: '#EAECEF' }}
+                        />
+
+                        <label className="flex items-center justify-between text-[10px]" style={{ color: '#EAECEF' }}>
+                          <span>{ts(indicator.useAlphaVantageSentiment, language)}</span>
+                          <input
+                            type="checkbox"
+                            checked={config.use_alpha_vantage_news_sentiment ?? true}
+                            onChange={(e) => !disabled && onChange({ ...config, use_alpha_vantage_news_sentiment: e.target.checked })}
+                            disabled={disabled}
+                            className="w-3.5 h-3.5 rounded accent-blue-500"
+                          />
+                        </label>
+
+                        <div className="flex gap-2 items-center">
+                          <span className="text-[10px]" style={{ color: '#EAECEF' }}>{ts(indicator.tickerScope, language)}</span>
+                          <NofxSelect
+                            value={config.alpha_vantage_ticker_scope || 'auto'}
+                            onChange={(val) => !disabled && onChange({ ...config, alpha_vantage_ticker_scope: (val as 'auto' | 'manual') })}
+                            disabled={disabled}
+                            className="flex-1 px-2 py-1 rounded text-[10px]"
+                            style={{ background: '#1E2329', border: '1px solid #2B3139', color: '#EAECEF' }}
+                            options={[
+                              { value: 'auto', label: ts(indicator.tickerScopeAuto, language) },
+                              { value: 'manual', label: ts(indicator.tickerScopeManual, language) },
+                            ]}
+                          />
+                        </div>
+
+                        {(config.alpha_vantage_ticker_scope || 'auto') === 'manual' && (
+                          <input
+                            type="text"
+                            value={config.alpha_vantage_manual_tickers || ''}
+                            onChange={(e) => !disabled && onChange({ ...config, alpha_vantage_manual_tickers: e.target.value })}
+                            placeholder={ts(indicator.manualTickers, language)}
+                            disabled={disabled}
+                            className="w-full px-2 py-1.5 rounded text-[10px]"
+                            style={{ background: '#1E2329', border: '1px solid #2B3139', color: '#EAECEF' }}
+                          />
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

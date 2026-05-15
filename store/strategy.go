@@ -245,11 +245,16 @@ type IndicatorConfig struct {
 	PriceRankingLimit    int    `json:"price_ranking_limit,omitempty"`    // number of entries per ranking (default 10)
 
 	// News fundamental data
-	EnableNews             bool   `json:"enable_news"`
-	NewsLookbackHours      int    `json:"news_lookback_hours,omitempty"`
-	NewsMaxItems           int    `json:"news_max_items,omitempty"`
-	EnableCryptoPanicNews  bool   `json:"enable_cryptopanic_news,omitempty"`
-	CryptoPanicAPIKey      string `json:"cryptopanic_api_key,omitempty"`
+	EnableNews                    bool   `json:"enable_news"`
+	NewsLookbackHours             int    `json:"news_lookback_hours,omitempty"`
+	NewsMaxItems                  int    `json:"news_max_items,omitempty"`
+	EnableCryptoPanicNews         bool   `json:"enable_cryptopanic_news,omitempty"`
+	CryptoPanicAPIKey             string `json:"cryptopanic_api_key,omitempty"`
+	EnableAlphaVantageNews        bool   `json:"enable_alpha_vantage_news,omitempty"`
+	AlphaVantageAPIKey            string `json:"alpha_vantage_api_key,omitempty"`
+	UseAlphaVantageNewsSentiment  bool   `json:"use_alpha_vantage_news_sentiment,omitempty"`
+	AlphaVantageTickerScope       string `json:"alpha_vantage_ticker_scope,omitempty"` // "auto" | "manual"
+	AlphaVantageManualTickers     string `json:"alpha_vantage_manual_tickers,omitempty"`
 }
 
 // KlineConfig K-line configuration
@@ -380,9 +385,12 @@ func GetDefaultStrategyConfig(lang string) StrategyConfig {
 			PriceRankingDuration: "1h,4h,24h",
 			PriceRankingLimit:    10,
 			// News fundamental data (off by default)
-			EnableNews:           false,
-			NewsLookbackHours:    12,
-			NewsMaxItems:         20,
+			EnableNews:                   false,
+			NewsLookbackHours:            12,
+			NewsMaxItems:                 20,
+			EnableAlphaVantageNews:       false,
+			UseAlphaVantageNewsSentiment: true,
+			AlphaVantageTickerScope:      "auto",
 		},
 		RiskControl: RiskControlConfig{
 			MaxPositions:                 3,   // Max 3 coins simultaneously (CODE ENFORCED)
