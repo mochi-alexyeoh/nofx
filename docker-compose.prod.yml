@@ -26,7 +26,7 @@ services:
     env_file:
       - .env
     environment:
-      - TZ=${TZ:-Asia/Shanghai}
+      - TZ=${NOFX_TIMEZONE:-Asia/Shanghai}
       - AI_MAX_TOKENS=8000
     networks:
       - nofx-network
@@ -64,14 +64,20 @@ services:
       start_period: 5s
 
   certbot:
-    image: certbot/certbot
+    image: lscr.io/linuxserver/certbot:latest
     container_name: nofx-certbot
     volumes:
       - ./nginx/certs:/etc/letsencrypt
       - ./nginx/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+      - /var/run/docker.sock:/var/run/docker.sock # Allows certbot to talk to Docker
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${NOFX_TIMEZONE:-Asia/Shanghai}
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --deploy-hook \"docker exec nofx-frontend nginx -s reload\"; sleep 12h & wait $${!}; done;'"
     networks:
       - nofx-network
+    restart: unless-stopped
 
 networks:
   nofx-network:
